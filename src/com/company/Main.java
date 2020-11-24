@@ -1,35 +1,39 @@
 package com.company;
 
+import dbpackage.DatabaseHandler;
+import dbpackage.UserRegister;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
-import java.util.logging.Logger;
 
 
 public class Main {
 
-    private final static Logger LOG = Logger.getGlobal();
-
-    public static Connection getConnect() throws SQLException{
-        String serverHost = "localhost:3307";
-        String databaseName = "dbProj";
-        String userName = "root";
-        String password = "Cheesepasta613!";
-
-        try{
-            Class.forName("org.mariadb.jdbc.Driver");
-
-        }catch(ClassNotFoundException e){
-            LOG.severe("CRITICAL ERROR - Database is not loadable. ERROR MESSAGE: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-        LOG.fine("DATABASE CONNECTED");
-        return DriverManager.getConnection("jdbc:mysql://"+serverHost+"/"+databaseName,userName,password);
-    }
     public static void main(String[] args) throws SQLException {
         //Set Database Connection
-        Connection connection = getConnect();
+        Connection connection = DatabaseHandler.getConnect();
+
+        //Intro
+        System.out.println("******* Welcome to Kyum's Music Streaming Service! *******\n");
+
+        //Input from user - get instruction
+        Integer instr = -1;
+        Scanner sc = new Scanner(System.in);
+        while (!instr.equals(0)) {
+            System.out.println("0. EXIT\n1.SIGN IN\n2.REGISTER\nYOUR OPTION: ");
+            instr = Integer.parseInt(sc.next());
+
+            switch (instr) {
+                case 0:
+                    break;
+
+                case 2:
+                    UserRegister.register(connection);
+            }
+        }
+
+        connection.close();
     }
 }
+
