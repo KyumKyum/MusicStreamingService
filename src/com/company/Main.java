@@ -1,7 +1,7 @@
 package com.company;
 
 import dbpackage.DatabaseHandler;
-import dbpackage.UserRegister;
+import ServiceFunc.UserRegister;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,7 +21,8 @@ public class Main {
         Integer instr = -1;
         Scanner sc = new Scanner(System.in);
         while (!instr.equals(0)) {
-            System.out.println("0. EXIT\n1.SIGN IN\n2.REGISTER\nYOUR OPTION: ");
+            System.out.println("- MAIN PAGE -");
+            System.out.print("0. EXIT\n1.SIGN IN\n2.REGISTER\nYOUR OPTION: ");
             instr = Integer.parseInt(sc.next());
 
             switch (instr) {

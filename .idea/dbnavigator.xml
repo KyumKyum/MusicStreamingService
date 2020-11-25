@@ -25,7 +25,8 @@
     <show-object-properties value="true" />
     <loaded-nodes>
       <connection connection-id="33d30858-daca-4b51-9cb3-9c37c406cda5">
-        <schema name="dbproj" object-types="constraint, index, procedure, dataset trigger, column, table, view, function" />
+        <schema name="company" object-types="function, view, procedure, table" />
+        <schema name="dbproj" object-types="constraint, index, function, column, view, procedure, table, dataset trigger" />
       </connection>
     </loaded-nodes>
   </component>
