@@ -7,6 +7,8 @@ public class DatabaseQuery {
     private final static String USER = "serviceuser";
     private final static String ACCOUNT = "account";
 
+
+    //FIND
     public static ResultSet findUser (Connection con, String ssn) {
         ResultSet rs = null;
         try{
@@ -14,11 +16,41 @@ public class DatabaseQuery {
             Statement stmt = con.prepareStatement(query);
             rs = stmt.executeQuery(query);
             stmt.close();
+            //rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return rs;
+    }
+
+    public static ResultSet findAccount (Connection con, String colNames, String ssn) {
+        ResultSet rs = null;
+        try{
+            String query = String.format("SELECT %s FROM %s WHERE Ussn = %s",colNames,ACCOUNT,"'"+ssn+"'");
+            Statement stmt = con.prepareStatement(query);
+            rs = stmt.executeQuery(query);
+            stmt.close();
+            //rs.close();
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return rs;
+    }
+
+    public static boolean checkID(Connection con, String id){
+        boolean returnVal = false;
+        try{
+            String query = String.format("SELECT ID FROM %s WHERE ID = %s",ACCOUNT,"'"+id+"'");
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            returnVal = !(rs.next()); //If the id exist, returns false
+            stmt.close();
+            rs.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return returnVal;
     }
 
     public static void insertNewUser(Connection con, ArrayList<String> userInfo){
@@ -33,6 +65,7 @@ public class DatabaseQuery {
            }
 
            pstmt.execute();
+           pstmt.close();
 
        }catch (SQLException e){
            e.printStackTrace();
@@ -50,7 +83,7 @@ public class DatabaseQuery {
             pstmt.setString(4,ssn);
 
             pstmt.execute();
-
+            pstmt.close();
         }catch (SQLException e){
             e.printStackTrace();
         }finally {

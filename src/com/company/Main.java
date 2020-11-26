@@ -1,5 +1,6 @@
 package com.company;
 
+import ServiceFunc.UserAccount;
 import dbpackage.DatabaseHandler;
 import ServiceFunc.UserRegister;
 
@@ -22,7 +23,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         while (!instr.equals(0)) {
             System.out.println("- MAIN PAGE -");
-            System.out.print("0. EXIT\n1.SIGN IN\n2.REGISTER\nYOUR OPTION: ");
+            System.out.print("0. EXIT\n1.SIGN IN\n2.REGISTER\n3.FIND MY ACCOUNT\nYOUR OPTION: ");
             instr = Integer.parseInt(sc.next());
 
             switch (instr) {
@@ -31,6 +32,9 @@ public class Main {
 
                 case 2:
                     UserRegister.register(connection);
+
+                case 3:
+                    UserAccount.findAccount(connection);
             }
         }
 

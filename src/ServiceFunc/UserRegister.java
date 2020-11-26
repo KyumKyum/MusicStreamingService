@@ -16,20 +16,14 @@ public class UserRegister {
         String dump;
 
         System.out.println("You selected the option \"REGISTER\".\n");
-        System.out.print("Are You New? (Enter Yes:y/NO:n/Return to main Page: 0)  ");
-        String input = sc.next();
-        sc.nextLine();
-        instr = input.charAt(0);
 
-        while(true){
-            if(instr.equals('y') || instr.equals('Y')){ //new registration
-                try{
-                    registerNew(con);
-                }catch (SQLException e){
-                    e.printStackTrace();
-                }
-                break;
-            }
+        System.out.println("Hello new visitor! ");
+        System.out.print("Are you ready to join our service?");
+
+        try {
+            registerNew(con);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -40,7 +34,6 @@ public class UserRegister {
         vec.add("Age");
         vec.add("Email");
 
-        System.out.println("Hello new visitor! ");
         System.out.println("Enter your information to create account! <Step 1/2>");
         ArrayList<String> userInfo = new ArrayList<>(4);
 
@@ -62,13 +55,13 @@ public class UserRegister {
             System.out.println("Enter your information to create account! <Step 2/2>");
             registerAccount(con,userInfo.get(0));
         }else{ //User Already Exist.
-            System.out.println("You are user of the service already! Want to create new Account?\n(Enter Yes:y/NO:n)");
+            System.out.println("You are user of the service already! Do you want to find your Account?\n(Enter Yes:y/NO:n)");
             String input = sc.next();
             sc.nextLine();
             Character instr = input.charAt(0);
 
             if(instr.equals('y') || instr.equals('Y')){
-                registerAccount(con,userInfo.get(0));
+                UserAccount.findAccount(con);
             }
         }
     }
@@ -81,19 +74,26 @@ public class UserRegister {
 
         ArrayList<String> accountInfo = new ArrayList<>(3);
 
-        for(int i = 0; i < vec.size(); i++){ //Get mandatory information: name, ssn, age
-            String userInput = null;
-            System.out.print("Your "+vec.elementAt(i)+": ");
-            do {
-                userInput = sc.nextLine();
-                if (userInput.trim().isEmpty())
-                    System.out.println("ERROR: Current Information is mandatory.");
-                else
-                    accountInfo.add(i, userInput);
-            } while (userInput.trim().isEmpty());
+        while(true){
+            for(int i = 0; i < vec.size(); i++){ //Get mandatory information: name, ssn, age
+                String userInput = null;
+                System.out.print("Your "+vec.elementAt(i)+": ");
+                do {
+                    userInput = sc.nextLine();
+                    if (userInput.trim().isEmpty())
+                        System.out.println("ERROR: Current Information is mandatory.");
+                    else
+                        accountInfo.add(i, userInput);
+                } while (userInput.trim().isEmpty());
+            }
+
+            if(DatabaseQuery.checkID(con,accountInfo.get(0))) {
+                DatabaseQuery.insertNewAccount(con, accountInfo, ssn);
+                break;
+            }
+            else{
+                System.out.println("Sorry, but the id "+accountInfo.get(0)+" is already exists.");
+            }
         }
-
-        DatabaseQuery.insertNewAccount(con,accountInfo,ssn);
     }
-
 }
