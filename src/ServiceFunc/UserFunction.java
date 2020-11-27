@@ -3,19 +3,23 @@ package ServiceFunc;
 import dbpackage.DatabaseQuery;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.Vector;
 
-public class UserRegister {
+public class UserFunction {
     public static Scanner sc = new Scanner(System.in);
+
+    //User Function: Register
     public static void register(Connection con) {
 
         Character instr = null;
         String dump;
 
-        System.out.println("You selected the option \"REGISTER\".\n");
+        System.out.println(" - REGISTER -\n");
 
         System.out.println("Hello new visitor! ");
         System.out.print("Are you ready to join our service?");
@@ -87,13 +91,69 @@ public class UserRegister {
                 } while (userInput.trim().isEmpty());
             }
 
-            if(DatabaseQuery.checkID(con,accountInfo.get(0))) {
-                DatabaseQuery.insertNewAccount(con, accountInfo, ssn);
-                break;
-            }
-            else{
-                System.out.println("Sorry, but the id "+accountInfo.get(0)+" is already exists.");
+            try{
+                if(!((DatabaseQuery.checkAccount(con,"ID",accountInfo.get(0))).next())){
+                    DatabaseQuery.insertNewAccount(con, accountInfo, ssn);
+                    break;
+                }else{
+                    System.out.println("Sorry, but the id "+accountInfo.get(0)+" is already exists.");
+                }
+            }catch (SQLException e){
+                e.printStackTrace();
             }
         }
+    }
+
+    //User Function: Sign in
+    public static void signIn(Connection con){
+        System.out.println(" - SIGN IN -\n");
+
+        Character instr = '\0';
+
+        while(!instr.equals('0')){
+            System.out.print("Press 1 to sign in.\nPress 0 to return (Go to main menu).\nYour Option:");
+            instr = sc.nextLine().charAt(0);
+
+            switch (instr) {
+                case '0' -> System.out.println("Return to the main menu...\n");
+                case '1' -> {
+                    ArrayList<String> userInfo = getAuth(con);
+                    if (!Objects.isNull(userInfo)) {
+                        System.out.print("Signing in...\n");
+                        UserPage.openingUserPage(con, userInfo);
+                        instr = '0';
+                    } else
+                        System.out.println("Sign in Failed.\nHint: Maybe your ID or password is wrong.");
+                }
+                default -> System.out.println("ERROR: Invalid Input");
+            }
+        }
+    }
+
+    private static ArrayList<String> getAuth(Connection con){
+        String ID = null;
+        String PW = null;
+        ArrayList<String> userInfo = new ArrayList<>(3);
+
+        System.out.print("Your ID: ");
+        ID = sc.nextLine();
+        System.out.print("Your Password: ");
+        PW = sc.nextLine();
+
+        ResultSet rs = DatabaseQuery.checkAccount(con,"Nickname",ID,PW);
+
+        try{
+            if(rs.next()){
+                 userInfo.add(0,rs.getString("Nickname"));
+                 userInfo.add(1,ID);
+                 userInfo.add(2,PW);
+
+                 return userInfo;
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

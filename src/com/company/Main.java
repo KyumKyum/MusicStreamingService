@@ -1,8 +1,9 @@
 package com.company;
 
+import AdminFunc.AdminFunc;
 import ServiceFunc.UserAccount;
 import dbpackage.DatabaseHandler;
-import ServiceFunc.UserRegister;
+import ServiceFunc.UserFunction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -23,18 +24,32 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         while (!instr.equals(0)) {
             System.out.println("- MAIN PAGE -");
-            System.out.print("0. EXIT\n1.SIGN IN\n2.REGISTER\n3.FIND MY ACCOUNT\nYOUR OPTION: ");
+            System.out.print("0. EXIT\n1.SIGN IN\n2.REGISTER\n3.FIND MY ACCOUNT\n4.ADMINISTRATOR MENU\nYOUR OPTION: ");
             instr = Integer.parseInt(sc.next());
 
             switch (instr) {
                 case 0:
                     break;
 
+                case 1:
+                    UserFunction.signIn(connection);
+                    break;
+
                 case 2:
-                    UserRegister.register(connection);
+                    UserFunction.register(connection);
+                    break;
 
                 case 3:
                     UserAccount.findAccount(connection);
+                    break;
+
+                case 4:
+                    AdminFunc.AdminAuth(connection);
+                    break;
+
+                default:
+                    System.out.println("ERROR: Invalid Input");
+                    instr = -1;
             }
         }
 
