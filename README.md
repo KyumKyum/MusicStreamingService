@@ -2,8 +2,15 @@
 
 <hr/>
 
-- Current Progress
+  - *Sample music list*<br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Anonymous Artists - 퇴사 (Art. 이민석) <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Caravan Palace - Lone Digger (Phietto Remix) <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Dominic Fike - Vampire <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Imagine Dragons - Birds <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;The Living Tombstone - Drunk <br>
+<br>
 
+- **Current Progress**
   > i. Connect IntelliJ to MariaDB using MariaDB ConnectorJ<br>
   > ii. Table generated for user and account<br>
   > **iii. Register function created**<br>
@@ -21,14 +28,9 @@
   > xv. Admin can see all or specific user data, except password and SSN <br>
   > xvi. Created Music table which contains music data <br>
   > xvii. Add sample musics to local media folder <br>
-  > *Sample music list*<br>
-  > &nbsp;&nbsp;&nbsp;&nbsp;Anonymous Artists - 퇴사 (Art. 이민석) <br>
-  > &nbsp;&nbsp;&nbsp;&nbsp;Caravan Palace - Lone Digger (Phietto Remix) <br>
-  > &nbsp;&nbsp;&nbsp;&nbsp;Dominic Fike - Vampire <br>
-  > &nbsp;&nbsp;&nbsp;&nbsp;Imagine Dragons - Birds <br>
-  > &nbsp;&nbsp;&nbsp;&nbsp;The Living Tombstone - Drunk <br>
   > xviii. Implemented javasf library to use JavaPanel, Media and MediaPlayer <br>
   > xix. Created MusicPlayer class, which can perform play, pause, reload and stop <br>
   > **xx. User now can search music by title, and play them.** <br>
+  <br>
 
-  - 02:46 28,Nov
+  - 19:28 28,Nov
