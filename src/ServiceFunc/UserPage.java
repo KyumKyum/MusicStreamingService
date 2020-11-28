@@ -3,6 +3,7 @@ package ServiceFunc;
 import dbpackage.DatabaseQuery;
 import dbpackage.GeneralQuery;
 
+import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,11 +24,84 @@ public class UserPage {
         Character instr = '\0';
 
         while (!instr.equals('0')) {
+            Vector<String> vec = new Vector<>(8);
+            vec.add(0, "Title");
+            vec.add(1, "Artist");
+            vec.add(2, "Prod");
+            vec.add(3, "Playtime");
+            vec.add(4, "Genre");
+            vec.add(5, "Released");
+            vec.add(6, "T_played");
+            vec.add(7, "URL");
+
             System.out.println("\n-" + userInfo.get(0) + "'s Page-");
             System.out.print("Press 1 to search music.\nPress 2 to configure your profile.\npress 3 to sign out\nYour Option: ");
             instr = sc.nextLine().charAt(0);
 
             switch (instr) {
+
+                case '1' -> {
+
+                    Character option = '\0';
+
+                    while (!option.equals('0')) {
+                        System.out.print("\nPress 1 to search music by title.\nPress 0 to exit.\nYour Choice");
+                        option = sc.nextLine().charAt(0);
+
+                        switch (option) {
+                            case '0' -> {
+                                System.out.println("Canceled.\n");
+                            }
+
+                            case '1' -> {
+                                System.out.print("Enter Title: ");
+                                String title = sc.nextLine();
+                                ArrayList<ResultSet> resultSets = UserFunction.searchMusic(con, "Title", "'" + title + "%'");
+                                ResultSet num = resultSets.get(0);
+                                ResultSet queryResult = resultSets.get(1);
+                                boolean noResult = false;
+
+                                try {
+                                    while (num.next()) {
+                                        Integer number = num.getInt("number");
+                                        System.out.println(number + " result(s) found.");
+
+                                        noResult = number.equals(0);
+                                    }
+
+                                    System.out.print("Index Number | ");
+                                    for (int i = 0; i < vec.size() - 2; i++) {
+                                        System.out.print(vec.get(i) + " | ");
+                                    }
+                                    System.out.println("\n");
+
+                                    while (queryResult.next()) {
+                                        System.out.print(queryResult.getInt("IDX") + " | ");
+                                        for (int i = 0; i < vec.size() - 2; i++) {
+                                            System.out.print(queryResult.getString(vec.get(i)) + " | ");
+                                        }
+                                        System.out.print("\n");
+                                    }
+
+                                    if(!noResult){
+                                        System.out.println("Enter 'index number' of music you want to play (Enter * to return): ");
+                                        String target = sc.nextLine();
+
+                                        if (target.equals("*"))
+                                            System.out.print("Return to music search page...\n");
+
+                                        else{
+                                            UserFunction.playMusic(con,target);
+                                        }
+                                    }
+
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                }
 
                 case '2' -> {
                     userProfile(con, userInfo);
@@ -138,17 +212,17 @@ public class UserPage {
 
                         if (!(oldPassword.equals(profile.get("PW"))))
                             System.out.println("Request Denied: Didn't match with original password\n");
-                        else{
+                        else {
                             String same = null;
                             System.out.print("Your new password: ");
                             newPassword = sc.nextLine();
                             System.out.print("Your new password (confirm): ");
                             same = sc.nextLine();
 
-                            if(newPassword.equals(same)){
-                                DatabaseQuery.updateProfile(con,ACCOUNT, "PW","'"+newPassword+"'","Ussn = " + curSsn);
+                            if (newPassword.equals(same)) {
+                                DatabaseQuery.updateProfile(con, ACCOUNT, "PW", "'" + newPassword + "'", "Ussn = " + curSsn);
                                 System.out.println("\nChange Applied!\n");
-                            }else{
+                            } else {
                                 System.out.println("ERROR: New password didn't match.\n");
                             }
                         }
@@ -164,10 +238,10 @@ public class UserPage {
 
                         System.out.print("Your new Nickname is " + newNickName + ". Am I right? (Enter y to say Yes): ");
                         answer = sc.nextLine().charAt(0);
-                        if(answer.equals('y')||answer.equals('Y')){
-                            DatabaseQuery.updateProfile(con, ACCOUNT, "Nickname", "'"+newNickName+"'","Ussn = " + curSsn);
+                        if (answer.equals('y') || answer.equals('Y')) {
+                            DatabaseQuery.updateProfile(con, ACCOUNT, "Nickname", "'" + newNickName + "'", "Ussn = " + curSsn);
                             System.out.println("\nChange Applied!\n");
-                        }else{
+                        } else {
                             System.out.println("Cancel the changes...");
                         }
                         instr = '0';

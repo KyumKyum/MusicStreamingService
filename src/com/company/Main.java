@@ -23,7 +23,7 @@ public class Main {
         Integer instr = -1;
         Scanner sc = new Scanner(System.in);
         while (!instr.equals(0)) {
-            System.out.println("- MAIN PAGE -");
+            System.out.println("\n- MAIN PAGE -");
             System.out.print("0. EXIT\n1.SIGN IN\n2.REGISTER\n3.FIND MY ACCOUNT\n4.ADMINISTRATOR MENU\nYOUR OPTION: ");
             instr = Integer.parseInt(sc.next());
 

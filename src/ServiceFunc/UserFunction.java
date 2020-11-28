@@ -1,6 +1,9 @@
 package ServiceFunc;
 
+import MediaFunc.MusicPlayer;
+import com.sun.javafx.image.impl.General;
 import dbpackage.DatabaseQuery;
+import dbpackage.GeneralQuery;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,6 +15,8 @@ import java.util.Vector;
 
 public class UserFunction {
     public static Scanner sc = new Scanner(System.in);
+
+    private final static String MUSIC = "music";
 
     //User Function: Register
     public static void register(Connection con) {
@@ -111,11 +116,11 @@ public class UserFunction {
         Character instr = '\0';
 
         while(!instr.equals('0')){
-            System.out.print("Press 1 to sign in.\nPress 0 to return (Go to main menu).\nYour Option:");
+            System.out.print("Press 1 to sign in.\nPress 0 to return (Go to main menu).\nYour Option: ");
             instr = sc.nextLine().charAt(0);
 
             switch (instr) {
-                case '0' -> System.out.println("Return to the main menu...\n");
+                case '0' -> System.out.println("\nReturn to the main menu...\n");
                 case '1' -> {
                     ArrayList<String> userInfo = getAuth(con);
                     if (!Objects.isNull(userInfo)) {
@@ -123,9 +128,9 @@ public class UserFunction {
                         UserPage.openingUserPage(con, userInfo);
                         instr = '0';
                     } else
-                        System.out.println("Sign in Failed.\nHint: Maybe your ID or password is wrong.");
+                        System.out.println("\nSign in Failed.\nHint: Maybe your ID or password is wrong.");
                 }
-                default -> System.out.println("ERROR: Invalid Input");
+                default -> System.out.println("\nERROR: Invalid Input");
             }
         }
     }
@@ -135,7 +140,7 @@ public class UserFunction {
         String PW = null;
         ArrayList<String> userInfo = new ArrayList<>(3);
 
-        System.out.print("Your ID: ");
+        System.out.print("\nYour ID: ");
         ID = sc.nextLine();
         System.out.print("Your Password: ");
         PW = sc.nextLine();
@@ -156,4 +161,75 @@ public class UserFunction {
 
         return null;
     }
+
+     public static ArrayList<ResultSet> searchMusic(Connection con, String searchFor, String target){
+        ArrayList<ResultSet> results = new ArrayList<>(2);
+
+        results.add(0,GeneralQuery.generalCheck(con,"COUNT(*) AS number",MUSIC,searchFor + " LIKE " + target));
+        results.add(1,GeneralQuery.generalCheck(con,"*",MUSIC,searchFor + " LIKE " + target));
+
+        return results;
+     }
+
+     public static void playMusic(Connection con, String idx){
+
+        try{
+            ResultSet rs = GeneralQuery.generalCheck(con,"*",MUSIC,"IDX = " + Integer.parseInt(idx));
+            String url = null;
+            while(rs.next()){
+                int numPlayed = rs.getInt("T_played");
+                GeneralQuery.generalUpdate(con,MUSIC,"T_played = " + String.valueOf(++numPlayed),"IDX = " + Integer.parseInt(idx));
+                url = rs.getString("URL");
+                System.out.println(rs.getString("Title") + " - " + rs.getString("Artist"));
+                System.out.println("Playtime: " + rs.getString("Playtime"));
+            }
+
+            if(!Objects.isNull(url)){
+                MusicPlayer musicPlayer = new MusicPlayer();
+                musicPlayer.initialize(url);
+                Character option = '\0';
+                boolean playing = false;
+
+                while(!option.equals('0')){
+                    System.out.println("\nPress 1 to play & pause.\nPress 2 to stop.\nPress 3 to reload.\nPress 0 to return\nYour Option: ");
+                    option = sc.nextLine().charAt(0);
+
+                    switch (option){
+
+                        case '0' -> {
+                            System.out.println("Returning...");
+                            musicPlayer.stop();
+                        }
+                        case '1' -> {
+                            playing = !playing;
+                            if(playing)
+                                System.out.println("Playing...");
+                            else
+                                System.out.println("Pausing...");
+
+                            musicPlayer.play(playing);
+                        }
+
+                        case '2' -> {
+                            System.out.println("Stopping...");
+                            playing = false;
+                            musicPlayer.stop();
+                        }
+
+                        case '3' -> {
+                            System.out.println("Reloading...");
+                            playing = true;
+                            musicPlayer.reload();
+                        }
+                    }
+                }
+
+            }else
+                System.out.print("ERROR: Music not exists.");
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+     }
 }
