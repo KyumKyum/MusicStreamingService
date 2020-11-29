@@ -1,5 +1,6 @@
 package AdminFunc;
 
+import dbpackage.DatabaseHandler;
 import dbpackage.GeneralQuery;
 
 import java.sql.Connection;
@@ -9,11 +10,6 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class AdminPage {
-
-    private final static String USER = "serviceuser";
-    private final static String ACCOUNT = "account";
-    private final static String ADMIN = "admin";
-    private final static String PROFILE = "profile";
 
     public static Scanner sc = new Scanner(System.in);
 
@@ -53,7 +49,7 @@ public class AdminPage {
                     String target = sc.nextLine();
 
 
-                    ResultSet rs = GeneralQuery.generalCheck(con, "ID,name,Nickname,age,Email", PROFILE, "ID = " + "'" + target + "'");
+                    ResultSet rs = GeneralQuery.generalCheck(con, "ID,name,Nickname,age,Email", DatabaseHandler.PROFILE, "ID = " + "'" + target + "'");
                     try {
                         if (!Objects.isNull(rs) && rs.next()) {
                             System.out.println("Account Found!");

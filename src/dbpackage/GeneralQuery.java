@@ -33,4 +33,30 @@ public class GeneralQuery {
         return res;
     }
 
+    public static boolean generalInsert(Connection con, String tableName, String values){
+        boolean res = false;
+        try{
+            String query = String.format("INSERT INTO %s VALUES(%s)",tableName,values);
+            Statement stmt = con.createStatement();
+            res = stmt.execute(query);
+            stmt.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+    public static boolean generalInsert(Connection con, String tableName, String columns, String values){
+        boolean res = false;
+        try{
+            String query = String.format("INSERT INTO %s(%s) VALUES(%s)",tableName,columns,values);
+            Statement stmt = con.createStatement();
+            res = stmt.execute(query);
+            stmt.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+
 }

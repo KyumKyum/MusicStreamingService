@@ -2,6 +2,7 @@ package ServiceFunc;
 
 import MediaFunc.MusicPlayer;
 import com.sun.javafx.image.impl.General;
+import dbpackage.DatabaseHandler;
 import dbpackage.DatabaseQuery;
 import dbpackage.GeneralQuery;
 
@@ -16,7 +17,6 @@ import java.util.Vector;
 public class UserFunction {
     public static Scanner sc = new Scanner(System.in);
 
-    private final static String MUSIC = "music";
 
     //User Function: Register
     public static void register(Connection con) {
@@ -47,9 +47,9 @@ public class UserFunction {
         ArrayList<String> userInfo = new ArrayList<>(4);
 
 
-        for(int i = 0; i < vec.size(); i++){ //Get mandatory information: name, ssn, age
+        for (int i = 0; i < vec.size(); i++) { //Get mandatory information: name, ssn, age
             String userInput = null;
-            System.out.print("Your "+vec.elementAt(i)+": ");
+            System.out.print("Your " + vec.elementAt(i) + ": ");
             do {
                 userInput = sc.nextLine();
                 if (userInput.trim().isEmpty())
@@ -59,23 +59,23 @@ public class UserFunction {
             } while (userInput.trim().isEmpty());
         }
 
-        if(!(DatabaseQuery.findUser(con,userInfo.get(0)).next())){
-            DatabaseQuery.insertNewUser(con,userInfo);
+        if (!(DatabaseQuery.findUser(con, userInfo.get(0)).next())) {
+            DatabaseQuery.insertNewUser(con, userInfo);
             System.out.println("Enter your information to create account! <Step 2/2>");
-            registerAccount(con,userInfo.get(0));
-        }else{ //User Already Exist.
+            registerAccount(con, userInfo.get(0));
+        } else { //User Already Exist.
             System.out.println("You are user of the service already! Do you want to find your Account?\n(Enter Yes:y/NO:n)");
             String input = sc.next();
             sc.nextLine();
             Character instr = input.charAt(0);
 
-            if(instr.equals('y') || instr.equals('Y')){
+            if (instr.equals('y') || instr.equals('Y')) {
                 UserAccount.findAccount(con);
             }
         }
     }
 
-    private static void registerAccount(Connection con, String ssn){
+    private static void registerAccount(Connection con, String ssn) {
         Vector<String> vec = new Vector<>(3);
         vec.add("ID");
         vec.add("Password");
@@ -83,10 +83,10 @@ public class UserFunction {
 
         ArrayList<String> accountInfo = new ArrayList<>(3);
 
-        while(true){
-            for(int i = 0; i < vec.size(); i++){ //Get mandatory information: name, ssn, age
+        while (true) {
+            for (int i = 0; i < vec.size(); i++) { //Get mandatory information: name, ssn, age
                 String userInput = null;
-                System.out.print("Your "+vec.elementAt(i)+": ");
+                System.out.print("Your " + vec.elementAt(i) + ": ");
                 do {
                     userInput = sc.nextLine();
                     if (userInput.trim().isEmpty())
@@ -96,26 +96,26 @@ public class UserFunction {
                 } while (userInput.trim().isEmpty());
             }
 
-            try{
-                if(!((DatabaseQuery.checkAccount(con,"ID",accountInfo.get(0))).next())){
+            try {
+                if (!((DatabaseQuery.checkAccount(con, "ID", accountInfo.get(0))).next())) {
                     DatabaseQuery.insertNewAccount(con, accountInfo, ssn);
                     break;
-                }else{
-                    System.out.println("Sorry, but the id "+accountInfo.get(0)+" is already exists.");
+                } else {
+                    System.out.println("Sorry, but the id " + accountInfo.get(0) + " is already exists.");
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
     //User Function: Sign in
-    public static void signIn(Connection con){
+    public static void signIn(Connection con) {
         System.out.println(" - SIGN IN -\n");
 
         Character instr = '\0';
 
-        while(!instr.equals('0')){
+        while (!instr.equals('0')) {
             System.out.print("Press 1 to sign in.\nPress 0 to return (Go to main menu).\nYour Option: ");
             instr = sc.nextLine().charAt(0);
 
@@ -135,66 +135,105 @@ public class UserFunction {
         }
     }
 
-    private static ArrayList<String> getAuth(Connection con){
+    private static ArrayList<String> getAuth(Connection con) {
         String ID = null;
         String PW = null;
-        ArrayList<String> userInfo = new ArrayList<>(3);
+        ArrayList<String> userInfo = new ArrayList<>(4);
 
         System.out.print("\nYour ID: ");
         ID = sc.nextLine();
         System.out.print("Your Password: ");
         PW = sc.nextLine();
 
-        ResultSet rs = DatabaseQuery.checkAccount(con,"Nickname",ID,PW);
+        ResultSet rs = DatabaseQuery.checkAccount(con, "UserIndex, Nickname", ID, PW);
 
-        try{
-            if(rs.next()){
-                 userInfo.add(0,rs.getString("Nickname"));
-                 userInfo.add(1,ID);
-                 userInfo.add(2,PW);
+        try {
+            if (rs.next()) {
+                userInfo.add(0, rs.getString("Nickname"));
+                userInfo.add(1, ID);
+                userInfo.add(2, PW);
+                userInfo.add(3, String.valueOf(rs.getInt("UserIndex")));
 
-                 return userInfo;
+                return userInfo;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-     public static ArrayList<ResultSet> searchMusic(Connection con, String searchFor, String target){
+    public static ArrayList<ResultSet> searchMusic(Connection con, String searchFor, String target) {
         ArrayList<ResultSet> results = new ArrayList<>(2);
 
-        results.add(0,GeneralQuery.generalCheck(con,"COUNT(*) AS number",MUSIC,searchFor + " LIKE " + target));
-        results.add(1,GeneralQuery.generalCheck(con,"*",MUSIC,searchFor + " LIKE " + target));
+        results.add(0, GeneralQuery.generalCheck(con, "COUNT(*) AS number", DatabaseHandler.MUSIC, searchFor + " LIKE " + target));
+        results.add(1, GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, searchFor + " LIKE " + target));
 
         return results;
-     }
+    }
 
-     public static void playMusic(Connection con, String idx){
+    public static ArrayList<ResultSet> searchPlaylist(Connection con, int idx) throws SQLException {
+        ArrayList<ResultSet> results = new ArrayList<>(2);
 
-        try{
-            ResultSet rs = GeneralQuery.generalCheck(con,"*",MUSIC,"IDX = " + Integer.parseInt(idx));
+        results.add(0, GeneralQuery.generalCheck(con, "COUNT(*) AS number", DatabaseHandler.PLAYLIST, "Owner_idx = " + idx));
+        results.add(1, GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST, "Owner_idx = " + idx));
+
+        return results;
+    }
+
+    public static Integer checkPLMusicNum(Connection con, int pidx) throws SQLException{
+       ResultSet rs = GeneralQuery.generalCheck(con,"COUNT(*) AS number",DatabaseHandler.PLAYLIST_MUSIC,"PIDX = " +pidx);
+       Integer musicNum = null;
+       while(rs.next()){
+           musicNum = rs.getInt("number");
+       }
+
+       return musicNum;
+    }
+
+    public static void createPlaylist(Connection con, int idx) {
+        //boolean success = false;
+
+        System.out.print("\nEnter new playlist name: ");
+        String newName = sc.nextLine();
+        ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST, "PIDX = " + idx + " AND Playlist_name = '" + newName + "'");
+        try {
+            if (rs.next()) {
+                System.out.println("Request Denied: Duplicated playlist name for one user is not allowed.");
+            } else {
+                GeneralQuery.generalInsert(con, DatabaseHandler.PLAYLIST, "Owner_idx, Playlist_name", idx + ", '" + newName + "'");
+                System.out.println("Playlist Created!");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        //return success;
+    }
+
+    public static void playMusic(Connection con, String idx) {
+
+        try {
+            ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, "IDX = " + Integer.parseInt(idx));
             String url = null;
-            while(rs.next()){
+            while (rs.next()) {
                 int numPlayed = rs.getInt("T_played");
-                GeneralQuery.generalUpdate(con,MUSIC,"T_played = " + String.valueOf(++numPlayed),"IDX = " + Integer.parseInt(idx));
+                GeneralQuery.generalUpdate(con, DatabaseHandler.MUSIC, "T_played = " + String.valueOf(++numPlayed), "IDX = " + Integer.parseInt(idx));
                 url = rs.getString("URL");
                 System.out.println(rs.getString("Title") + " - " + rs.getString("Artist"));
                 System.out.println("Playtime: " + rs.getString("Playtime"));
             }
 
-            if(!Objects.isNull(url)){
+            if (!Objects.isNull(url)) {
                 MusicPlayer musicPlayer = new MusicPlayer();
                 musicPlayer.initialize(url);
                 Character option = '\0';
                 boolean playing = false;
 
-                while(!option.equals('0')){
+                while (!option.equals('0')) {
                     System.out.println("\nPress 1 to play & pause.\nPress 2 to stop.\nPress 3 to reload.\nPress 0 to return\nYour Option: ");
                     option = sc.nextLine().charAt(0);
 
-                    switch (option){
+                    switch (option) {
 
                         case '0' -> {
                             System.out.println("Returning...");
@@ -202,7 +241,7 @@ public class UserFunction {
                         }
                         case '1' -> {
                             playing = !playing;
-                            if(playing)
+                            if (playing)
                                 System.out.println("Playing...");
                             else
                                 System.out.println("Pausing...");
@@ -224,12 +263,12 @@ public class UserFunction {
                     }
                 }
 
-            }else
+            } else
                 System.out.print("ERROR: Music not exists.");
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
-     }
+    }
 }

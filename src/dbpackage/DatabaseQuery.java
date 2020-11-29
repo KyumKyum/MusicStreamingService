@@ -4,17 +4,11 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class DatabaseQuery {
-    private final static String USER = "serviceuser";
-    private final static String ACCOUNT = "account";
-    private final static String ADMIN = "admin";
-    private final static String PROFILE = "profile";
-
-
     //FIND
     public static ResultSet findUser (Connection con, String ssn) {
         ResultSet rs = null;
         try{
-            String query = String.format("SELECT * FROM %s WHERE SSN = %s",USER,"'"+ssn+"'");
+            String query = String.format("SELECT * FROM %s WHERE SSN = %s",DatabaseHandler.USER,"'"+ssn+"'");
             Statement stmt = con.prepareStatement(query);
             rs = stmt.executeQuery(query);
             stmt.close();
@@ -28,7 +22,7 @@ public class DatabaseQuery {
     public static ResultSet findAccount (Connection con, String colNames, String ssn) {//User
         ResultSet rs = null;
         try{
-            String query = String.format("SELECT %s FROM %s WHERE Ussn = %s",colNames,ACCOUNT,"'"+ssn+"'");
+            String query = String.format("SELECT %s FROM %s WHERE Ussn = %s",colNames,DatabaseHandler.ACCOUNT,"'"+ssn+"'");
             Statement stmt = con.prepareStatement(query);
             rs = stmt.executeQuery(query);
             stmt.close();
@@ -43,7 +37,7 @@ public class DatabaseQuery {
     public static ResultSet findAccount (Connection con, String colNames, String ID, String PW, String SerialNum) {//Admin
         ResultSet rs = null;
         try{
-            String query = String.format("SELECT %s FROM %s WHERE AID = %s AND APW = %s AND SerialNum = %s",colNames,ADMIN,ID,PW,SerialNum);
+            String query = String.format("SELECT %s FROM %s WHERE AID = %s AND APW = %s AND SerialNum = %s",colNames,DatabaseHandler.ADMIN,ID,PW,SerialNum);
             Statement stmt = con.prepareStatement(query);
             rs = stmt.executeQuery(query);
             stmt.close();
@@ -60,7 +54,7 @@ public class DatabaseQuery {
 
         try{
             ID = "'"+ID+"'";
-            String query = String.format("SELECT * from %s where ID = %s",PROFILE,ID);
+            String query = String.format("SELECT * from %s where ID = %s",DatabaseHandler.PROFILE,ID);
             Statement stmt = con.prepareStatement(query);
             rs = stmt.executeQuery(query);
             stmt.close();
@@ -76,7 +70,7 @@ public class DatabaseQuery {
         //boolean returnVal = false;
         ResultSet rs = null;
         try{
-            String query = String.format("SELECT %s FROM %s WHERE ID = %s",colNames,ACCOUNT,"'"+id+"'");
+            String query = String.format("SELECT %s FROM %s WHERE ID = %s",colNames,DatabaseHandler.ACCOUNT,"'"+id+"'");
             Statement stmt = con.createStatement();
             rs = stmt.executeQuery(query);
             //returnVal = !(rs.next()); //If the id exist, returns false
@@ -92,7 +86,7 @@ public class DatabaseQuery {
         //boolean returnVal = false;
         ResultSet rs = null;
         try{
-            String query = String.format("SELECT %s FROM %s WHERE ID = %s AND PW = %s",colNames,ACCOUNT,"'"+id+"'","'"+password+"'");
+            String query = String.format("SELECT %s FROM %s WHERE ID = %s AND PW = %s",colNames,DatabaseHandler.ACCOUNT,"'"+id+"'","'"+password+"'");
             Statement stmt = con.createStatement();
             rs = stmt.executeQuery(query);
             //returnVal = !(rs.next()); //If the id exist, returns false
@@ -107,7 +101,7 @@ public class DatabaseQuery {
     //Insert
     public static void insertNewUser(Connection con, ArrayList<String> userInfo){
        try{
-           String query = String.format("INSERT INTO %s VALUES (?,?,?,?)",USER);
+           String query = String.format("INSERT INTO %s VALUES (?,?,?,?)",DatabaseHandler.USER);
            PreparedStatement pstmt = con.prepareStatement(query);
            for (int i = 1; i <= 4; i++){
                if(i != 3)
@@ -126,7 +120,7 @@ public class DatabaseQuery {
 
     public static void insertNewAccount(Connection con, ArrayList<String> accountInfo, String ssn){
         try{
-            String query = String.format("INSERT INTO %s(ID,PW,Nickname,Ussn) VALUES (?,?,?,?)",ACCOUNT);
+            String query = String.format("INSERT INTO %s(ID,PW,Nickname,Ussn) VALUES (?,?,?,?)",DatabaseHandler.ACCOUNT);
             PreparedStatement pstmt = con.prepareStatement(query);
 
             for(int i = 1; i <= 3; i++){

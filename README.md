@@ -31,6 +31,8 @@
   > xviii. Implemented javasf library to use JavaPanel, Media and MediaPlayer <br>
   > xix. Created MusicPlayer class, which can perform play, pause, reload and stop <br>
   > **xx. User now can search music by title, and play them.** <br>
+  > xxi. Created Playlist table and table for playlist music <br>
+  > xxii. **xxii. User now can create and query their playlist. It also shows the number of music in the playlist** <br>
   <br>
 
   - 19:28 28,Nov
