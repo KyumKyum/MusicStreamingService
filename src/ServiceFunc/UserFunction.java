@@ -5,6 +5,7 @@ import com.sun.javafx.image.impl.General;
 import dbpackage.DatabaseHandler;
 import dbpackage.DatabaseQuery;
 import dbpackage.GeneralQuery;
+import org.mariadb.jdbc.internal.com.read.dao.Results;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -208,6 +209,36 @@ public class UserFunction {
             e.printStackTrace();
         }
         //return success;
+    }
+
+    public static ResultSet getPlaylist(Connection con, String playlistName, int ownerIdx) throws SQLException{
+        ResultSet rs = GeneralQuery.generalCheck(con,"PIDX",DatabaseHandler.PLAYLIST,
+                "Playlist_name = '" + playlistName + "' AND Owner_idx = " + ownerIdx);
+        Integer playlistIdx = -1;
+        while(rs.next())
+            playlistIdx = rs.getInt("PIDX");
+
+        if(playlistIdx.equals(-1))
+            return null;
+
+        return GeneralQuery.generalCheck(con,"*",DatabaseHandler.PLAYLIST_MUSIC +
+                ", " + DatabaseHandler.MUSIC,"playlist_music.MUSICIDX = music.IDX AND playlist_music.PIDX = " + playlistIdx);
+    }
+
+    public static int addMusicToPlaylist (Connection con, int midx, int pidx)throws SQLException{
+        ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, "IDX = " + midx);
+
+        if(!rs.next())
+            return -1;
+        else{
+            ResultSet qrs = GeneralQuery.generalCheck(con,"*",DatabaseHandler.PLAYLIST_MUSIC,"MUSICIDX = " + midx + " AND PIDX = " + pidx);
+
+            if(qrs.next())
+                return -2;
+
+            GeneralQuery.generalInsert(con,DatabaseHandler.PLAYLIST_MUSIC,midx + ", " + pidx);
+        }
+        return 0;
     }
 
     public static void playMusic(Connection con, String idx) {
