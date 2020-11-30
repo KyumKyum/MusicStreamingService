@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// 이거두 User처럼 바꿔서 사용하면 될 것 같아요 ^^
 public enum MusicAttribute {
     TITLE(0, "Title", "none"),
     ARTIST(1, "Artist", "none"),
