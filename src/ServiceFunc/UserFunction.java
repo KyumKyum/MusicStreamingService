@@ -126,7 +126,7 @@ public class UserFunction {
                     ArrayList<String> userInfo = getAuth(con);
                     if (!Objects.isNull(userInfo)) {
                         System.out.print("Signing in...\n");
-                        UserPage.openingUserPage(con, userInfo);
+                        UserPage.openUserPage(con, userInfo);
                         instr = '0';
                     } else
                         System.out.println("\nSign in Failed.\nHint: Maybe your ID or password is wrong.");
