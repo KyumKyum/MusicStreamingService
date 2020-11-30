@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Vector;
@@ -19,22 +20,12 @@ public class UserPage {
     public static Scanner sc = new Scanner(System.in);
 
     //userInfo - 0: Nickname, 1: ID, 2: PW 3: UserIndex
-    public static void openingUserPage(Connection con, ArrayList<String> userInfo) {
+    public static void openUserPage(Connection con, ArrayList<String> userInfo) {
         System.out.println("\nWELCOME! " + userInfo.get(0));
 
         int instr = 1;
 
         while (instr != 0) {
-            // Vector<String> vec = new Vector<>(8);
-            // vec.add(0, "Title");
-            // vec.add(1, "Artist");
-            // vec.add(2, "Prod");
-            // vec.add(3, "Playtime");
-            // vec.add(4, "Genre");
-            // vec.add(5, "Released");
-            // vec.add(6, "T_played");
-            // vec.add(7, "URL");
-
             System.out.println("\n-" + userInfo.get(0) + "'s Page-");
             System.out.print("Press 1 to search music.\nPress 2 to see my playlist\n" +
                 "Press 3 to configure your profile.\npress 4 to sign out\nYour Option: ");
@@ -75,6 +66,43 @@ public class UserPage {
         System.out.println("See you later, " + userInfo.get(0) + "!");
     }
 
+    private static void searchMusic(Connection con) throws SQLException {
+        int option = 1;
+
+        while (option != 0) {
+            System.out.print("\nPress 1 to search music by title.\nPress 0 to exit.\nYour Choice");
+            option = parse(sc.nextLine());
+
+            if (option == -1) {
+                continue;
+            }
+
+            if (option == 0) {
+                System.out.println("Canceled.\n");
+            }
+
+            if (option == 1) {
+                System.out.print("Enter Title: ");
+                String title = sc.nextLine();
+
+                ArrayList<ResultSet> resultSets = UserFunction.searchMusic(
+                    con, "Title", "'" + title + "%'");
+                ResultSet rs = resultSets.get(0);
+                ResultSet queryResult = resultSets.get(1);
+                List<MusicAttribute> musicAttributes = MusicAttribute.getNoneTypes();
+
+                System.out.print("Index Number | ");
+                printMusicAttributes(queryResult, musicAttributes);
+
+                while (queryResult.next()) {
+                    System.out.print(queryResult.getInt("IDX") + " | ");
+                    printMusicAttributes(queryResult, musicAttributes);
+                }
+                playMusic(con, rs);
+            }
+        }
+    }
+
     private static void findPlayList(Connection con, ArrayList<String> userInfo) {
         try {
             int userIndex = Integer.parseInt(userInfo.get(3));
@@ -82,14 +110,7 @@ public class UserPage {
             ResultSet num = rs.get(0);
             ResultSet playList = rs.get(1);
 
-            boolean noResult = false;
-
-            while (num.next()) {
-                Integer number = num.getInt("number");
-                System.out.println(number + " result(s) found.");
-
-                noResult = number.equals(0);
-            }
+            boolean noResult = hasResult(num);
 
             if (noResult) {
                 System.out.println("No Playlist Found. Create new playlist? (Y: Yes/N: No): ");
@@ -181,66 +202,25 @@ public class UserPage {
         }
     }
 
-    private static void searchMusic(Connection con) throws SQLException {
-        int option = 1;
+    private static void printMusicAttributes(ResultSet queryResult, List<MusicAttribute> musicAttributes) throws
+        SQLException {
+        for (MusicAttribute musicAttribute : musicAttributes) {
+            System.out.print(queryResult.getString(musicAttribute.getAttribute()) + " | ");
+        }
+        System.out.println("\n");
+    }
 
-        while (option != 0) {
-            System.out.print("\nPress 1 to search music by title.\nPress 0 to exit.\nYour Choice");
-            option = parse(sc.nextLine());
+    private static void playMusic(Connection con, ResultSet rs) throws SQLException {
+        if (hasResult(rs)) {
+            System.out.println(
+                "Enter 'index number' of music you want to play (Enter * to return): ");
+            String target = sc.nextLine();
 
-            if (option == -1) {
-                continue;
+            if (target.equals("*")) {
+                System.out.print("Return to music search page...\n");
+                return;
             }
-
-            if (option == 0) {
-                System.out.println("Canceled.\n");
-            }
-
-            if (option == 1) {
-                System.out.print("Enter Title: ");
-                String title = sc.nextLine();
-
-                ArrayList<ResultSet> resultSets = UserFunction.searchMusic(
-                    con, "Title", "'" + title + "%'");
-                ResultSet rs = resultSets.get(0);
-                ResultSet queryResult = resultSets.get(1);
-                boolean noResult = false;
-
-                while (rs.next()) {
-                    Integer number = rs.getInt("number");
-                    System.out.println(number + " result(s) found.");
-
-                    noResult = number.equals(0);
-                }
-
-                System.out.print("Index Number | ");
-                for (int i = 0; i < vec.size() - 2; i++) {
-                    System.out.print(vec.get(i) + " | ");
-                }
-                System.out.println("\n");
-
-                while (queryResult.next()) {
-                    System.out.print(queryResult.getInt("IDX") + " | ");
-                    for (int i = 0; i < vec.size() - 2; i++) {
-                        System.out.print(queryResult.getString(vec.get(i)) + " | ");
-                    }
-                    System.out.print("\n");
-                }
-
-                if (!noResult) {
-                    System.out.println(
-                        "Enter 'index number' of music you want to play (Enter * to return): ");
-                    String target = sc.nextLine();
-
-                    if (target.equals("*"))
-                        System.out.print("Return to music search page...\n");
-
-                    else {
-                        UserFunction.playMusic(con, target);
-                    }
-                }
-
-            }
+            UserFunction.playMusic(con, target);
         }
     }
 
@@ -380,6 +360,18 @@ public class UserPage {
             e.printStackTrace();
         }
 
+    }
+
+    private static boolean hasResult(ResultSet num) throws SQLException {
+        boolean result = false;
+
+        while (num.next()) {
+            Integer number = num.getInt("number");
+            System.out.println(number + " result(s) found.");
+
+            result = number.equals(0);
+        }
+        return !result;
     }
 
     private static int parse(String input) {
