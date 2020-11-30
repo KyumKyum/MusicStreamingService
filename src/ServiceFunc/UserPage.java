@@ -53,17 +53,24 @@ public class UserPage {
             }
 
             if (instr == 4) {
-                System.out.print("Are you Sure? (Enter Yes or y to confirm.)");
-                Character YorN = sc.nextLine().charAt(0);
-
-                if (YorN.equals('y') || YorN.equals('Y')) {
+                if (signOut()) {
                     break;
-                } else {
-                    System.out.println("Return to the user page...");
                 }
             }
         }
         System.out.println("See you later, " + userInfo.get(0) + "!");
+    }
+
+    private static boolean signOut() {
+        System.out.print("Are you Sure? (Enter Yes or y to confirm.)");
+        Character YorN = sc.nextLine().charAt(0);
+
+        if (YorN.equals('y') || YorN.equals('Y')) {
+            return true;
+        } else {
+            System.out.println("Return to the user page...");
+        }
+        return false;
     }
 
     private static void searchMusic(Connection con) throws SQLException {
