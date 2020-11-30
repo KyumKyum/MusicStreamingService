@@ -1,14 +1,18 @@
 package ServiceFunc;
 
-import dbpackage.DatabaseHandler;
-import dbpackage.DatabaseQuery;
-import dbpackage.GeneralQuery;
-
-import javax.xml.transform.Result;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.Vector;
+
+import dbpackage.DatabaseHandler;
+import dbpackage.DatabaseQuery;
+import dbpackage.GeneralQuery;
 
 public class UserPage {
 
@@ -18,217 +22,226 @@ public class UserPage {
     public static void openingUserPage(Connection con, ArrayList<String> userInfo) {
         System.out.println("\nWELCOME! " + userInfo.get(0));
 
-        Character instr = '\0';
+        int instr = 1;
 
-        while (!instr.equals('0')) {
-            Vector<String> vec = new Vector<>(8);
-            vec.add(0, "Title");
-            vec.add(1, "Artist");
-            vec.add(2, "Prod");
-            vec.add(3, "Playtime");
-            vec.add(4, "Genre");
-            vec.add(5, "Released");
-            vec.add(6, "T_played");
-            vec.add(7, "URL");
+        while (instr != 0) {
+            // Vector<String> vec = new Vector<>(8);
+            // vec.add(0, "Title");
+            // vec.add(1, "Artist");
+            // vec.add(2, "Prod");
+            // vec.add(3, "Playtime");
+            // vec.add(4, "Genre");
+            // vec.add(5, "Released");
+            // vec.add(6, "T_played");
+            // vec.add(7, "URL");
 
             System.out.println("\n-" + userInfo.get(0) + "'s Page-");
             System.out.print("Press 1 to search music.\nPress 2 to see my playlist\n" +
-                    "Press 3 to configure your profile.\npress 4 to sign out\nYour Option: ");
-            instr = sc.nextLine().charAt(0);
+                "Press 3 to configure your profile.\npress 4 to sign out\nYour Option: ");
+            instr = parse(sc.nextLine());
 
-            switch (instr) {
+            if (instr == -1) {
+                System.out.print("ERROR: WRONG INPUT");
+                continue;
+            }
 
-                case '1' -> {
-
-                    Character option = '\0';
-
-                    while (!option.equals('0')) {
-                        System.out.print("\nPress 1 to search music by title.\nPress 0 to exit.\nYour Choice");
-                        option = sc.nextLine().charAt(0);
-
-                        switch (option) {
-                            case '0' -> {
-                                System.out.println("Canceled.\n");
-                            }
-
-                            case '1' -> {
-                                System.out.print("Enter Title: ");
-                                String title = sc.nextLine();
-                                ArrayList<ResultSet> resultSets = UserFunction.searchMusic(con, "Title", "'" + title + "%'");
-                                ResultSet num = resultSets.get(0);
-                                ResultSet queryResult = resultSets.get(1);
-                                boolean noResult = false;
-
-                                try {
-                                    while (num.next()) {
-                                        Integer number = num.getInt("number");
-                                        System.out.println(number + " result(s) found.");
-
-                                        noResult = number.equals(0);
-                                    }
-
-                                    System.out.print("Index Number | ");
-                                    for (int i = 0; i < vec.size() - 2; i++) {
-                                        System.out.print(vec.get(i) + " | ");
-                                    }
-                                    System.out.println("\n");
-
-                                    while (queryResult.next()) {
-                                        System.out.print(queryResult.getInt("IDX") + " | ");
-                                        for (int i = 0; i < vec.size() - 2; i++) {
-                                            System.out.print(queryResult.getString(vec.get(i)) + " | ");
-                                        }
-                                        System.out.print("\n");
-                                    }
-
-                                    if (!noResult) {
-                                        System.out.println("Enter 'index number' of music you want to play (Enter * to return): ");
-                                        String target = sc.nextLine();
-
-                                        if (target.equals("*"))
-                                            System.out.print("Return to music search page...\n");
-
-                                        else {
-                                            UserFunction.playMusic(con, target);
-                                        }
-                                    }
-
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
+            if (instr == 1) {
+                try {
+                    searchMusic(con);
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
+            }
 
-                case '2' -> {
-                    try {
-                        int userIndex = Integer.parseInt(userInfo.get(3));
-                        ArrayList<ResultSet> rs = UserFunction.searchPlaylist(con, userIndex);
-                        ResultSet num = rs.get(0);
-                        ResultSet playList = rs.get(1);
+            if (instr == 2) {
+                findPlayList(con, userInfo);
+            }
 
-                        boolean noResult = false;
+            if (instr == 3) {
+                userProfile(con, userInfo);
+            }
 
+            if (instr == 4) {
+                System.out.print("Are you Sure? (Enter Yes or y to confirm.)");
+                Character YorN = sc.nextLine().charAt(0);
 
-                        while (num.next()) {
-                            Integer number = num.getInt("number");
-                            System.out.println(number + " result(s) found.");
-
-                            noResult = number.equals(0);
-                        }
-
-                        if (noResult) {
-                            System.out.println("No Playlist Found. Create new playlist? (Y: Yes/N: No): ");
-                            Character createNew = sc.nextLine().charAt(0);
-
-                            if (createNew.equals('y') || createNew.equals('Y')) {
-                                UserFunction.createPlaylist(con, userIndex);
-                            } else {
-                                System.out.println("Returning to user page...");
-                            }
-
-                        } else {
-                            String plTitle = null;
-
-                            do {
-                                System.out.println("PLAYLIST NAME (NUMBER OF MUSICS)");
-                                int pidx = -1;
-                                while (playList.next()) {
-
-                                    pidx = playList.getInt("PIDX");
-
-                                    System.out.println(playList.getString("Playlist_name") +
-                                            " (" + UserFunction.checkPLMusicNum(con, pidx) + ")");
-                                }
-
-                                System.out.println("\nEnter playlist name you want to listen. (Press * to cancel)");
-
-//                                while (Objects.isNull(plTitle))
-                                plTitle = sc.nextLine();
-
-                                Character option = '\0';
-                                while (!option.equals('0')) {
-                                    System.out.println("Playlist '" + plTitle + "'");
-
-                                    ResultSet musics = UserFunction.getPlaylist(con, plTitle, userIndex);
-
-                                    if (!Objects.isNull(musics)) {
-                                        musics.beforeFirst();
-                                        while (musics.next()) {
-                                            System.out.println(musics.getInt("MUSICIDX") + " | " + musics.getString("Title")
-                                                    + " - " + musics.getString("Artist"));
-                                        }
-
-                                        System.out.println("Playlist Options: \nPress 1 to listen music in playlist.\nPress 2 to add music to current playlist\n" +
-                                                "Press 3 to delete music in the playlist\nPress 0 to Return\nYour Option: ");
-
-                                        option = sc.nextLine().charAt(0);
-
-                                        switch (option) {
-                                            case '0' -> {
-                                                System.out.println("Returning...");
-                                            }
-
-                                            case '1' -> {
-
-                                            }
-
-                                            case '2' -> {
-                                                System.out.println("Write an index number of a music: ");
-                                                int midx = sc.nextInt();
-                                                sc.nextLine();
-
-                                                Integer result = UserFunction.addMusicToPlaylist(con, midx, pidx);
-
-                                                if (result.equals(0)) {
-                                                    System.out.println("Added!");
-                                                } else if (result.equals(-1))
-                                                    System.out.println("No music Found");
-                                                else if (result.equals(-2))
-                                                    System.out.println("Duplicate music exists in the same playlist!");
-                                            }
-                                        }
-                                    } else {
-                                        System.out.println("ERROR: There is no such playlist exists.");
-
-                                        break;
-                                    }
-                                }
-
-
-                            } while (!plTitle.equals("*"));
-
-
-                        }
-
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-
-                case '3' -> {
-                    userProfile(con, userInfo);
-                }
-
-                case '4' -> {
-                    System.out.print("Are you Sure? (Enter Yes or y to confirm.)");
-                    instr = sc.nextLine().charAt(0);
-
-                    if (instr.equals('y') || instr.equals('Y'))
-                        instr = '0';
-                    else
-                        System.out.println("Return to the user page...");
-                }
-
-                default -> {
-                    System.out.print("ERROR: WRONG INPUT");
-                    instr = '\0';
+                if (YorN.equals('y') || YorN.equals('Y')) {
+                    break;
+                } else {
+                    System.out.println("Return to the user page...");
                 }
             }
         }
         System.out.println("See you later, " + userInfo.get(0) + "!");
+    }
+
+    private static void findPlayList(Connection con, ArrayList<String> userInfo) {
+        try {
+            int userIndex = Integer.parseInt(userInfo.get(3));
+            ArrayList<ResultSet> rs = UserFunction.searchPlaylist(con, userIndex);
+            ResultSet num = rs.get(0);
+            ResultSet playList = rs.get(1);
+
+            boolean noResult = false;
+
+            while (num.next()) {
+                Integer number = num.getInt("number");
+                System.out.println(number + " result(s) found.");
+
+                noResult = number.equals(0);
+            }
+
+            if (noResult) {
+                System.out.println("No Playlist Found. Create new playlist? (Y: Yes/N: No): ");
+                Character createNew = sc.nextLine().charAt(0);
+
+                if (createNew.equals('y') || createNew.equals('Y')) {
+                    UserFunction.createPlaylist(con, userIndex);
+                } else {
+                    System.out.println("Returning to user page...");
+                }
+
+            } else {
+                String plTitle = null;
+
+                do {
+                    System.out.println("PLAYLIST NAME (NUMBER OF MUSICS)");
+                    int pidx = -1;
+                    while (playList.next()) {
+
+                        pidx = playList.getInt("PIDX");
+
+                        System.out.println(playList.getString("Playlist_name") +
+                            " (" + UserFunction.checkPLMusicNum(con, pidx) + ")");
+                    }
+
+                    System.out.println("\nEnter playlist name you want to listen. (Press * to cancel)");
+
+                    //                                while (Objects.isNull(plTitle))
+                    plTitle = sc.nextLine();
+
+                    Character option = '\0';
+                    while (!option.equals('0')) {
+                        System.out.println("Playlist '" + plTitle + "'");
+
+                        ResultSet musics = UserFunction.getPlaylist(con, plTitle, userIndex);
+
+                        if (!Objects.isNull(musics)) {
+                            musics.beforeFirst();
+                            while (musics.next()) {
+                                System.out.println(
+                                    musics.getInt("MUSICIDX") + " | " + musics.getString("Title")
+                                        + " - " + musics.getString("Artist"));
+                            }
+
+                            System.out.println(
+                                "Playlist Options: \nPress 1 to listen music in playlist.\nPress 2 to add music to current playlist\n"
+                                    +
+                                    "Press 3 to delete music in the playlist\nPress 0 to Return\nYour Option: ");
+
+                            option = sc.nextLine().charAt(0);
+
+                            switch (option) {
+                                case '0' -> {
+                                    System.out.println("Returning...");
+                                }
+
+                                case '1' -> {
+
+                                }
+
+                                case '2' -> {
+                                    System.out.println("Write an index number of a music: ");
+                                    int midx = sc.nextInt();
+                                    sc.nextLine();
+
+                                    Integer result = UserFunction.addMusicToPlaylist(con, midx, pidx);
+
+                                    if (result.equals(0)) {
+                                        System.out.println("Added!");
+                                    } else if (result.equals(-1))
+                                        System.out.println("No music Found");
+                                    else if (result.equals(-2))
+                                        System.out.println("Duplicate music exists in the same playlist!");
+                                }
+                            }
+                        } else {
+                            System.out.println("ERROR: There is no such playlist exists.");
+
+                            break;
+                        }
+                    }
+
+                } while (!plTitle.equals("*"));
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void searchMusic(Connection con) throws SQLException {
+        int option = 1;
+
+        while (option != 0) {
+            System.out.print("\nPress 1 to search music by title.\nPress 0 to exit.\nYour Choice");
+            option = parse(sc.nextLine());
+
+            if (option == -1) {
+                continue;
+            }
+
+            if (option == 0) {
+                System.out.println("Canceled.\n");
+            }
+
+            if (option == 1) {
+                System.out.print("Enter Title: ");
+                String title = sc.nextLine();
+
+                ArrayList<ResultSet> resultSets = UserFunction.searchMusic(
+                    con, "Title", "'" + title + "%'");
+                ResultSet rs = resultSets.get(0);
+                ResultSet queryResult = resultSets.get(1);
+                boolean noResult = false;
+
+                while (rs.next()) {
+                    Integer number = rs.getInt("number");
+                    System.out.println(number + " result(s) found.");
+
+                    noResult = number.equals(0);
+                }
+
+                System.out.print("Index Number | ");
+                for (int i = 0; i < vec.size() - 2; i++) {
+                    System.out.print(vec.get(i) + " | ");
+                }
+                System.out.println("\n");
+
+                while (queryResult.next()) {
+                    System.out.print(queryResult.getInt("IDX") + " | ");
+                    for (int i = 0; i < vec.size() - 2; i++) {
+                        System.out.print(queryResult.getString(vec.get(i)) + " | ");
+                    }
+                    System.out.print("\n");
+                }
+
+                if (!noResult) {
+                    System.out.println(
+                        "Enter 'index number' of music you want to play (Enter * to return): ");
+                    String target = sc.nextLine();
+
+                    if (target.equals("*"))
+                        System.out.print("Return to music search page...\n");
+
+                    else {
+                        UserFunction.playMusic(con, target);
+                    }
+                }
+
+            }
+        }
     }
 
     private static void userProfile(Connection con, ArrayList<String> userInfo) {
@@ -260,7 +273,9 @@ public class UserPage {
             Character instr = '\0';
             while (!instr.equals('0')) {
 
-                System.out.print("\nPROFILE OPTIONS:\nPress 1 to see my profile.\nPress 2 to change personal information(name,age)." +
+                System.out.print(
+                    "\nPROFILE OPTIONS:\nPress 1 to see my profile.\nPress 2 to change personal information(name,age)."
+                        +
                         "\nPress 3 tp change email address." +
                         "\nPress 4 to change Password.\nPress 5 to change Nickname.\nPress 0 to return.\nYour Choice: ");
 
@@ -285,7 +300,8 @@ public class UserPage {
                         System.out.print("Your new age: ");
                         newAge = Integer.parseInt(sc.nextLine());
 
-                        DatabaseQuery.updateProfile(con, DatabaseHandler.USER, "name", "'" + newName + "'", "SSN = " + curSsn);
+                        DatabaseQuery.updateProfile(con, DatabaseHandler.USER, "name", "'" + newName + "'",
+                            "SSN = " + curSsn);
                         DatabaseQuery.updateProfile(con, DatabaseHandler.USER, "age", newAge, "SSN = " + curSsn);
 
                         System.out.println("Change Applied!\n");
@@ -297,13 +313,16 @@ public class UserPage {
                         System.out.print("Your new Email: ");
                         newEmail = sc.nextLine();
 
-                        ResultSet checkedResult = GeneralQuery.generalCheck(con, "email", DatabaseHandler.USER, "email = '" + newEmail + "'");
+                        ResultSet checkedResult = GeneralQuery.generalCheck(con, "email", DatabaseHandler.USER,
+                            "email = '" + newEmail + "'");
 
                         if (!checkedResult.next()) {
-                            DatabaseQuery.updateProfile(con, DatabaseHandler.USER, "email", "'" + newEmail + "'", "SSN = " + curSsn);
+                            DatabaseQuery.updateProfile(con, DatabaseHandler.USER, "email", "'" + newEmail + "'",
+                                "SSN = " + curSsn);
                             System.out.println("\nChange Applied!\n");
                         } else {
-                            System.out.println("\nRequest Denied: The email " + newEmail + " is currently used by other user\n");
+                            System.out.println(
+                                "\nRequest Denied: The email " + newEmail + " is currently used by other user\n");
                         }
                         instr = '0';
                     }
@@ -325,7 +344,8 @@ public class UserPage {
                             same = sc.nextLine();
 
                             if (newPassword.equals(same)) {
-                                DatabaseQuery.updateProfile(con, DatabaseHandler.ACCOUNT, "PW", "'" + newPassword + "'", "Ussn = " + curSsn);
+                                DatabaseQuery.updateProfile(con, DatabaseHandler.ACCOUNT, "PW", "'" + newPassword + "'",
+                                    "Ussn = " + curSsn);
                                 System.out.println("\nChange Applied!\n");
                             } else {
                                 System.out.println("ERROR: New password didn't match.\n");
@@ -341,10 +361,12 @@ public class UserPage {
                         System.out.print("Your new Nickname: ");
                         newNickName = sc.nextLine();
 
-                        System.out.print("Your new Nickname is " + newNickName + ". Am I right? (Enter y to say Yes): ");
+                        System.out.print(
+                            "Your new Nickname is " + newNickName + ". Am I right? (Enter y to say Yes): ");
                         answer = sc.nextLine().charAt(0);
                         if (answer.equals('y') || answer.equals('Y')) {
-                            DatabaseQuery.updateProfile(con, DatabaseHandler.ACCOUNT, "Nickname", "'" + newNickName + "'", "Ussn = " + curSsn);
+                            DatabaseQuery.updateProfile(con, DatabaseHandler.ACCOUNT, "Nickname",
+                                "'" + newNickName + "'", "Ussn = " + curSsn);
                             System.out.println("\nChange Applied!\n");
                         } else {
                             System.out.println("Cancel the changes...");
@@ -360,4 +382,12 @@ public class UserPage {
 
     }
 
+    private static int parse(String input) {
+        try {
+            return Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            System.out.println("숫자만 입력해주세요.");
+        }
+        return -1;
+    }
 }
