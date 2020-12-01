@@ -8,6 +8,7 @@
    &nbsp;&nbsp;&nbsp;&nbsp;Dominic Fike - Vampire <br>
    &nbsp;&nbsp;&nbsp;&nbsp;Imagine Dragons - Birds <br>
    &nbsp;&nbsp;&nbsp;&nbsp;The Living Tombstone - Drunk <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Leellamarz - GONE <br>
 <br>
 
 - **Current Progress**
@@ -32,7 +33,13 @@
   > xix. Created MusicPlayer class, which can perform play, pause, reload and stop <br>
   > **xx. User now can search music by title, and play them.** <br>
   > xxi. Created Playlist table and table for playlist music <br>
-  > xxii. **xxii. User now can create and query their playlist. It also shows the number of music in the playlist** <br>
+  > **xxii. User now can create and query their playlist. It also shows the number of music in the playlist** <br>
+  > xxiii. Modified admin page. <br>
+  > **xxiv. Admin now can add, delete, and modify music and users.** <br>
+  > **xxv.Refactored User page and Admin page based on SOLID principle (Trouble Shooting Spaghetti Codes)** <br>
+  > **xxvi. Solved problems regarding playlist table. (Logical Error)** <br>
+  > xxvii. User now can play their music in their playlist. <br>
+  
   <br>
 
   - 19:28 28,Nov

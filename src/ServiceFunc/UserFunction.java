@@ -10,10 +10,7 @@ import org.mariadb.jdbc.internal.com.read.dao.Results;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.Vector;
+import java.util.*;
 
 public class UserFunction {
     public static Scanner sc = new Scanner(System.in);
@@ -126,7 +123,7 @@ public class UserFunction {
                     ArrayList<String> userInfo = getAuth(con);
                     if (!Objects.isNull(userInfo)) {
                         System.out.print("Signing in...\n");
-                        UserPage.openingUserPage(con, userInfo);
+                        UserPage.openUserPage(con, userInfo);
                         instr = '0';
                     } else
                         System.out.println("\nSign in Failed.\nHint: Maybe your ID or password is wrong.");
@@ -173,7 +170,7 @@ public class UserFunction {
         return results;
     }
 
-    public static ArrayList<ResultSet> searchPlaylist(Connection con, int idx) throws SQLException {
+    public static ArrayList<ResultSet> searchPlaylist(Connection con, int idx) {
         ArrayList<ResultSet> results = new ArrayList<>(2);
 
         results.add(0, GeneralQuery.generalCheck(con, "COUNT(*) AS number", DatabaseHandler.PLAYLIST, "Owner_idx = " + idx));
@@ -182,14 +179,14 @@ public class UserFunction {
         return results;
     }
 
-    public static Integer checkPLMusicNum(Connection con, int pidx) throws SQLException{
-       ResultSet rs = GeneralQuery.generalCheck(con,"COUNT(*) AS number",DatabaseHandler.PLAYLIST_MUSIC,"PIDX = " +pidx);
-       Integer musicNum = null;
-       while(rs.next()){
-           musicNum = rs.getInt("number");
-       }
+    public static Integer checkPLMusicNum(Connection con, int pidx) throws SQLException {
+        ResultSet rs = GeneralQuery.generalCheck(con, "COUNT(*) AS number", DatabaseHandler.PLAYLIST_MUSIC, "PIDX = " + pidx);
+        Integer musicNum = null;
+        while (rs.next()) {
+            musicNum = rs.getInt("number");
+        }
 
-       return musicNum;
+        return musicNum;
     }
 
     public static void createPlaylist(Connection con, int idx) {
@@ -211,32 +208,39 @@ public class UserFunction {
         //return success;
     }
 
-    public static ResultSet getPlaylist(Connection con, String playlistName, int ownerIdx) throws SQLException{
-        ResultSet rs = GeneralQuery.generalCheck(con,"PIDX",DatabaseHandler.PLAYLIST,
+    public static Integer getPlaylist(Connection con, String playlistName, int ownerIdx) throws SQLException {
+        ResultSet rs = GeneralQuery.generalCheck(con, "PIDX", DatabaseHandler.PLAYLIST,
                 "Playlist_name = '" + playlistName + "' AND Owner_idx = " + ownerIdx);
         Integer playlistIdx = -1;
-        while(rs.next())
+        while (rs.next())
             playlistIdx = rs.getInt("PIDX");
 
-        if(playlistIdx.equals(-1))
+        if (playlistIdx.equals(-1))
             return null;
+        else
+            return playlistIdx;
 
-        return GeneralQuery.generalCheck(con,"*",DatabaseHandler.PLAYLIST_MUSIC +
-                ", " + DatabaseHandler.MUSIC,"playlist_music.MUSICIDX = music.IDX AND playlist_music.PIDX = " + playlistIdx);
+//        return GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST_MUSIC +
+//                ", " + DatabaseHandler.MUSIC, "playlist_music.MUSICIDX = music.IDX AND playlist_music.PIDX = " + playlistIdx);
     }
 
-    public static int addMusicToPlaylist (Connection con, int midx, int pidx)throws SQLException{
+    public static ResultSet getMusicList(Connection con, int pidx){
+        return GeneralQuery.generalCheck(con, "MUSICIDX", DatabaseHandler.PLAYLIST_MUSIC, "PIDX = " + pidx);
+    }
+
+    public static int addMusicToPlaylist(Connection con, int midx, int pidx) throws SQLException {
         ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, "IDX = " + midx);
 
-        if(!rs.next())
+        if (!rs.next())
             return -1;
-        else{
-            ResultSet qrs = GeneralQuery.generalCheck(con,"*",DatabaseHandler.PLAYLIST_MUSIC,"MUSICIDX = " + midx + " AND PIDX = " + pidx);
+        else {
+            ResultSet qrs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST_MUSIC, "MUSICIDX = " + midx + " AND PIDX = " + pidx);
 
-            if(qrs.next())
+            if (qrs.next())
                 return -2;
 
-            GeneralQuery.generalInsert(con,DatabaseHandler.PLAYLIST_MUSIC,midx + ", " + pidx);
+
+            GeneralQuery.generalInsert(con, DatabaseHandler.PLAYLIST_MUSIC, "PIDX,MUSICIDX",pidx +","+midx);
         }
         return 0;
     }

@@ -44,7 +44,7 @@ public class AdminFunc {
             }
 
             if(!Objects.isNull(nickname)) {
-                System.out.println("\nRESULT: AUTHORIZATION SUCCEED\nOPENING THE ADMIN PAGE...\nWELCOME " + nickname + "!\n");//Admin login succedded
+                System.out.println("\nRESULT: AUTHORIZATION SUCCEED\nOPENING THE ADMIN PAGE...\n\nWELCOME " + nickname + "!\n");//Admin login succedded
                 AdminPage.openingAdminPage(con);
             }
             else

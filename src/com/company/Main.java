@@ -28,28 +28,18 @@ public class Main {
             instr = Integer.parseInt(sc.next());
 
             switch (instr) {
-                case 0:
-                    break;
-
-                case 1:
-                    UserFunction.signIn(connection);
-                    break;
-
-                case 2:
-                    UserFunction.register(connection);
-                    break;
-
-                case 3:
-                    UserAccount.findAccount(connection);
-                    break;
-
-                case 4:
-                    AdminFunc.AdminAuth(connection);
-                    break;
-
-                default:
+                case 0 -> {
+                    System.out.println("Closing...");
+                    instr = 0;
+                }
+                case 1 -> UserFunction.signIn(connection);
+                case 2 -> UserFunction.register(connection);
+                case 3 -> UserAccount.findAccount(connection);
+                case 4 -> AdminFunc.AdminAuth(connection);
+                default -> {
                     System.out.println("ERROR: Invalid Input");
                     instr = -1;
+                }
             }
         }
 
