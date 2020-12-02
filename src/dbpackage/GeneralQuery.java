@@ -33,6 +33,19 @@ public class GeneralQuery {
         return rs;
     }
 
+    public static ResultSet generalCheckByOrder(Connection con, String colNames, String from, String orderCondition, String limit){
+        ResultSet rs = null;
+        try{
+            String query = String.format("SELECT %s FROM %s ORDER BY %s LIMIT %s",colNames,from,orderCondition,limit);
+            Statement stmt = con.createStatement();
+            rs = stmt.executeQuery(query);
+            stmt.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return rs;
+    }
+
     public static boolean generalUpdate(Connection con, String tableName, String setValue, String condition){
         boolean res = false;
         try{

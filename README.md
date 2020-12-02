@@ -7,8 +7,16 @@
    &nbsp;&nbsp;&nbsp;&nbsp;Caravan Palace - Lone Digger (Phietto Remix) <br>
    &nbsp;&nbsp;&nbsp;&nbsp;Dominic Fike - Vampire <br>
    &nbsp;&nbsp;&nbsp;&nbsp;Imagine Dragons - Birds <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Imagine Dragons - Believer <br>
    &nbsp;&nbsp;&nbsp;&nbsp;The Living Tombstone - Drunk <br>
-   &nbsp;&nbsp;&nbsp;&nbsp;Leellamarz - GONE <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Fall Out Boys - The Phoenix <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Fall Out Boys - The Last Of The Real Ones <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;아이유 - Bleuming <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;AKMU(악뮤) - 어떻게 이별까지 사랑하겠어, 널 사랑하는 거지 <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;볼빨간사춘기 - 워커홀릭 <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Eminem - Lose Yourself <br>
+   &nbsp;&nbsp;&nbsp;&nbsp;Kdrew - Citadel <br>
+
 <br>
 
 - **Current Progress**
@@ -39,7 +47,13 @@
   > **xxv.Refactored User page and Admin page based on SOLID principle (Trouble Shooting Spaghetti Codes)** <br>
   > **xxvi. Solved problems regarding playlist table. (Logical Error)** <br>
   > xxvii. User now can play their music in their playlist. <br>
+  > xxviii. User now can delete and modify their playlist. <br>
+  > xxix. Table account_music generated. The number of music played are archived. <br>
+  > xxx. Creating Recommendation System. <br>
+  > xxxi. **The service can recommend mostly played musics** <br>
+  > xxxii.**The service can analyze User's favorate genre**. <br>
+  > xxxiii. **The service can recommend music based on the analysis.**. <br>
   
   <br>
 
-  - 19:28 28,Nov
+  - 21:15 02,Dec

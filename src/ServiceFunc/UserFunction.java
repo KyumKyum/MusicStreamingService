@@ -114,7 +114,7 @@ public class UserFunction {
         Character instr = '\0';
 
         while (!instr.equals('0')) {
-            System.out.print("Press 1 to sign in.\nPress 0 to return (Go to main menu).\nYour Option: ");
+            System.out.print("Press 1 to sign in.\nPress 2 to find my account\nPress 0 to return (Go to main menu).\nYour Option: ");
             instr = sc.nextLine().charAt(0);
 
             switch (instr) {
@@ -127,6 +127,9 @@ public class UserFunction {
                         instr = '0';
                     } else
                         System.out.println("\nSign in Failed.\nHint: Maybe your ID or password is wrong.");
+                }
+                case '2' -> {
+                    UserAccount.findAccount(con);
                 }
                 default -> System.out.println("\nERROR: Invalid Input");
             }
@@ -194,18 +197,30 @@ public class UserFunction {
 
         System.out.print("\nEnter new playlist name: ");
         String newName = sc.nextLine();
-        ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST, "PIDX = " + idx + " AND Playlist_name = '" + newName + "'");
+        if (checkPlaylistDuplicate(con, idx, newName)) {
+            GeneralQuery.generalInsert(con, DatabaseHandler.PLAYLIST, "Owner_idx, Playlist_name", idx + ", '" + newName + "'");
+            System.out.println("Playlist Created!");
+        }
+    }
+    //return success;
+
+
+    public static boolean checkPlaylistDuplicate(Connection con, int uidx, String newName) {
+        ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST, "Owner_idx = " + uidx + " AND Playlist_name = '" + newName + "'");
         try {
             if (rs.next()) {
                 System.out.println("Request Denied: Duplicated playlist name for one user is not allowed.");
-            } else {
-                GeneralQuery.generalInsert(con, DatabaseHandler.PLAYLIST, "Owner_idx, Playlist_name", idx + ", '" + newName + "'");
-                System.out.println("Playlist Created!");
+                return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //return success;
+
+        return true;
+    }
+
+    public static void changePlaylistName(Connection con, int pidx, String newName) {
+        GeneralQuery.generalUpdate(con, DatabaseHandler.PLAYLIST, "Playlist_name = '" + newName + "'", "PIDX = " + pidx);
     }
 
     public static Integer getPlaylist(Connection con, String playlistName, int ownerIdx) throws SQLException {
@@ -224,7 +239,7 @@ public class UserFunction {
 //                ", " + DatabaseHandler.MUSIC, "playlist_music.MUSICIDX = music.IDX AND playlist_music.PIDX = " + playlistIdx);
     }
 
-    public static ResultSet getMusicList(Connection con, int pidx){
+    public static ResultSet getMusicList(Connection con, int pidx) {
         return GeneralQuery.generalCheck(con, "MUSICIDX", DatabaseHandler.PLAYLIST_MUSIC, "PIDX = " + pidx);
     }
 
@@ -240,22 +255,47 @@ public class UserFunction {
                 return -2;
 
 
-            GeneralQuery.generalInsert(con, DatabaseHandler.PLAYLIST_MUSIC, "PIDX,MUSICIDX",pidx +","+midx);
+            GeneralQuery.generalInsert(con, DatabaseHandler.PLAYLIST_MUSIC, "PIDX,MUSICIDX", pidx + "," + midx);
         }
         return 0;
     }
 
-    public static void playMusic(Connection con, String idx) {
+    public static void deleteMusicFromPlaylist(Connection con, int midx, int pidx) {
+        GeneralQuery.generalDelete(con, DatabaseHandler.PLAYLIST_MUSIC, "MUSICIDX = " + midx + " AND PIDX = " + pidx);
+    }
+
+    public static void deletePlaylist(Connection con, int pidx){
+        GeneralQuery.generalDelete(con,DatabaseHandler.PLAYLIST,"PIDX = " + pidx);
+    }
+
+    public static void playMusic(Connection con, String musicIdx, Integer userIndex) {
 
         try {
-            ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, "IDX = " + Integer.parseInt(idx));
+            ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, "IDX = " + Integer.parseInt(musicIdx));
             String url = null;
             while (rs.next()) {
                 int numPlayed = rs.getInt("T_played");
-                GeneralQuery.generalUpdate(con, DatabaseHandler.MUSIC, "T_played = " + String.valueOf(++numPlayed), "IDX = " + Integer.parseInt(idx));
+                GeneralQuery.generalUpdate(con, DatabaseHandler.MUSIC,
+                        "T_played = " + String.valueOf(++numPlayed), "IDX = " + Integer.parseInt(musicIdx));
                 url = rs.getString("URL");
                 System.out.println(rs.getString("Title") + " - " + rs.getString("Artist"));
                 System.out.println("Playtime: " + rs.getString("Playtime"));
+            }
+
+            ResultSet userRs = GeneralQuery.generalCheck(con,"*",DatabaseHandler.ACCOUNT_MUSIC,
+                    "midx = "+ musicIdx + " AND uidx = " + userIndex);
+            boolean firstlyPlayed = true;
+
+            while(userRs.next()){
+                int numPlayed = userRs.getInt("numPlayed");
+                GeneralQuery.generalUpdate(con,DatabaseHandler.ACCOUNT_MUSIC,
+                        "numPlayed = " + String.valueOf(++numPlayed),"midx = "+ musicIdx + " AND uidx = " + userIndex);
+                firstlyPlayed = false;
+            }
+
+            if(firstlyPlayed){
+                GeneralQuery.generalInsert(con,DatabaseHandler.ACCOUNT_MUSIC,
+                        "midx, uidx, numPlayed",musicIdx + ", " +userIndex + ", 1");
             }
 
             if (!Objects.isNull(url)) {

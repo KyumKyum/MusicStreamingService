@@ -44,7 +44,7 @@ public class UserPage {
             }
 
             if (instr == 1) {
-                searchMusic(con);
+                searchMusic(con,Integer.parseInt(userInfo.get(3)));
             }
 
             if (instr == 2) {
@@ -63,25 +63,118 @@ public class UserPage {
         }
     }
 
-    private static void searchMusic(Connection con) throws SQLException {
-        int option = 1;
+    private static void searchMusic(Connection con, Integer userIndex) throws SQLException {
+        Integer option = 1;
 
-        while (option != 0) {
-            System.out.print("\nPress 1 to search music by title.\nPress 0 to exit.\nYour Choice");
+        while (!option.equals(0)) {
+            System.out.print("\nPress 1 to see all music listed\nPress 2 to see recommended musics.\n" +
+                    "Press 3 to search music by title.\nPress 4 to search music by Artist\n" +
+                    "Press 5 to find by Genre\nPress 6 to search directly by index\nPress 0 to exit.\nYour Choice: ");
             option = parse(sc.nextLine());
 
-            if (option == -1) {
-                continue;
+            if (option.equals(-1)) {
+                System.out.println("ERROR: Invalid Input");
             }
-
-            if (option == 0) {
+            else if (option.equals(0)) {
                 System.out.println("Canceled.\n");
             }
-
-            if (option == 1) {
-                ResultSet rs = searchMusicByTitle(con);
-                playMusic(con, rs);
+            else if (option.equals(1)) {
+                listAllMusic(con);
             }
+            else if(option.equals(2)){
+                recommendationMenu(con,userIndex);
+            }
+            else if (option.equals(3)) {
+                System.out.print("Enter Title: ");
+                String title = sc.nextLine();
+                searchMusicByTitle(con,title,userIndex);
+            }
+            else if (option.equals(4)){
+                System.out.println("Enter Artist Name: ");
+                String artist = sc.nextLine();
+                searchMusicByArtist(con,artist,userIndex);
+            }
+            else if(option.equals(5)){
+                System.out.println("Enter Genre: ");
+                String genre = sc.nextLine();
+                searchMusicByGenre(con,genre,userIndex);
+            }else if(option.equals(6)){
+                playMusic(con,userIndex);
+            }
+        }
+    }
+
+    private static void recommendationMenu(Connection con,int userIndex) {
+        System.out.println("\nPress 1 to see Mostly played music by other users\nPress 2 to see Kyum's pick\nPress 0 to return.");
+        Integer option = parse(sc.nextLine());
+
+        if (option.equals(-1)) {
+            System.out.println("ERROR: Invalid Input");
+        } else if (option.equals(0)) {
+            System.out.println("Canceled.\n");
+        }else if(option.equals(1)){
+            listMostPlayed(con,userIndex);
+        }else if(option.equals(2)){
+            recommendMusic(con, userIndex);
+        }
+    }
+
+    private static void recommendMusic(Connection con, int userIndex) {
+        System.out.println("Kyum is analyzing your favorite....\n");
+        ResultSet rs = GeneralQuery.generalCheck(con,"Genre",DatabaseHandler.MUSIC_MOSTLY_LISTENED,
+                "uidx = "+ userIndex +
+                        " AND numPlayed = (SELECT MAX(numPlayed) FROM account_music where uidx = "+ userIndex +" ) LIMIT 0,1");
+        String result = null;
+        try{
+            while(rs.next()){
+                result = rs.getString("Genre");
+            }
+
+            if(Objects.isNull(result)){
+                System.out.println("You haven't listened music at all! I cannot analyze your favorite... :(\n");
+            }else{
+                System.out.println("A-ha! You like " + result + " musics! Then, I will show some related musics....\n");
+                searchMusicByGenre(con,result,userIndex);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    private static void listMostPlayed(Connection con, Integer userIndex) {
+        ResultSet rs = GeneralQuery.generalCheck(con,"*",DatabaseHandler.MUSIC,
+                "T_played = (SELECT MAX(T_played) FROM " + DatabaseHandler.MUSIC +")");
+
+        System.out.println("\nThis is the list of music mostly played by users!");
+
+        System.out.println("\nIndex Number | Title | Artist | Produced by | Playtime | Genre | Released");
+        listMusic(rs);
+
+        ResultSet topRs = GeneralQuery.generalCheckByOrder(con,"*",DatabaseHandler.MUSIC,"T_played DESC, Title ASC", "0,5");
+
+        System.out.println("\nTop 5 popular music in the chart!");
+        System.out.println("\nIndex Number | Title | Artist | Produced by | Playtime | Genre | Released");
+        listMusic(topRs);
+        try{
+            playMusic(con,userIndex);
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    private static void listAllMusic(Connection con) {
+        ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC);
+        System.out.println("\nIndex Number | Title | Artist | Produced by | Playtime | Genre | Released");
+        listMusic(rs);
+    }
+
+    private static void listMusic(ResultSet rs){
+        try {
+            List<MusicAttribute> list = MusicAttribute.getGeneralTypes();
+            System.out.print("\n");
+            printMusicAttributes(rs, list);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -92,8 +185,8 @@ public class UserPage {
         ResultSet playList = rs.get(1);
 
         if (hasResult(num)) {
-            playListMenu(con,userIndex);
-        }else{
+            playListMenu(con, userIndex);
+        } else {
             System.out.println("No Playlist Found. Create new playlist? (Y: Yes/N: No): ");
             Character createNew = sc.nextLine().charAt(0);
 
@@ -108,7 +201,7 @@ public class UserPage {
 
     private static void playListMenu(Connection con, int userIndex) throws SQLException {
         int option = -1;
-        while(option != 0){
+        while (option != 0) {
             int pidx = -1;
 
             ArrayList<ResultSet> res = UserFunction.searchPlaylist(con, userIndex);
@@ -125,8 +218,8 @@ public class UserPage {
                     "\nPress 0 to return");
             option = parse(sc.nextLine());
 
-            switch (option){
-                case -1 ->{
+            switch (option) {
+                case -1 -> {
                     System.out.println("ERROR: Invalid Input");
                 }
 
@@ -138,18 +231,18 @@ public class UserPage {
                     UserFunction.createPlaylist(con, userIndex);
                 }
 
-                case 2-> {
+                case 2 -> {
                     System.out.print("Enter Playlist Title: ");
                     String title = sc.nextLine();
 
 
-                    Integer playlistIdx = UserFunction.getPlaylist(con,title,userIndex);
+                    Integer playlistIdx = UserFunction.getPlaylist(con, title, userIndex);
 
-                    if(!Objects.isNull(playlistIdx)){
+                    if (!Objects.isNull(playlistIdx)) {
 
-                        playListOptions(con,title,playlistIdx);
+                        playListOptions(con, playlistIdx, userIndex);
 
-                    }else{
+                    } else {
                         System.out.println("ERROR: Wrong Title or Unauthorized Access");
                     }
                 }
@@ -157,20 +250,28 @@ public class UserPage {
         }
     }
 
-    private static void playListOptions(Connection con, String title, int playlistIndex) {
+    private static void playListOptions(Connection con, int playlistIndex, int userIndex) {
         int option = -1;
-        while(option != 0) {
-            try{
-                System.out.println("\n Playlist '" + title + "'\nNumber of Music(s): "
-                        + UserFunction.checkPLMusicNum(con,playlistIndex)+"\n");
-                ResultSet rs = UserFunction.getMusicList(con,playlistIndex);
-                showAllMusics(con,rs);
+        while (option != 0) {
+            try {
+
+                ResultSet anyUpdates = GeneralQuery.generalCheck(con, "Playlist_name", DatabaseHandler.PLAYLIST, "Owner_idx = " + userIndex +
+                        " AND PIDX = " + playlistIndex);
+                String title = null;
+                while (anyUpdates.next()) { //update Playlist Name
+                    title = anyUpdates.getString("Playlist_name");
+                }
+
+                System.out.println("\nPlaylist '" + title + "'\nNumber of Music(s): "
+                        + UserFunction.checkPLMusicNum(con, playlistIndex) + "\n");
+                ResultSet rs = UserFunction.getMusicList(con, playlistIndex);
+                showAllMusics(con, rs);
 
                 System.out.println("\nOptions:\nPress 1 to add music\nPress 2 to play music\n" +
                         "Press 3 to delete music\nPress 4 to change playlist name\nPress 5 to delete current playlist\nPress 0 to Return");
                 option = parse(sc.nextLine());
 
-                switch (option){
+                switch (option) {
                     case -1 -> {
                         System.out.println("ERROR: INVALID INPUT");
                     }
@@ -179,48 +280,104 @@ public class UserPage {
                         System.out.println("Returning...");
                     }
 
-                    case 1->{
-                        addMusic(con,playlistIndex);
-                    }
-                    
-                    case 2 ->{
-                        playPlaylistMusic(con,playlistIndex);
-                    }
-                    
-                    case 3->{
-                        //todo
-                    }
-                    
-                    case 4->{
-                        //todo
+                    case 1 -> {
+                        addMusic(con, playlistIndex);
                     }
 
-
-                    case 5->{
-                        //todo
+                    case 2 -> {
+                        playPlaylistMusic(con, playlistIndex, userIndex);
                     }
-                    
+
+                    case 3 -> {
+                        deletePlaylistMusic(con, playlistIndex);
+                    }
+
+                    case 4 -> {
+                        changePlaylistName(con, playlistIndex, userIndex);
+                    }
+
+                    case 5 -> {
+                        option = deletePlaylist(con, playlistIndex);
+                    }
+
                 }
-                
-            }catch (SQLException e){
+
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private static void playPlaylistMusic(Connection con, int playlistIndex) throws SQLException {
+    private static Integer deletePlaylist(Connection con, int playlistIndex) {
+        System.out.print("Are you sure to delete? (All music will be deleted and current operation is not recoverable! (Y to confirm): ");
+        Character option = sc.nextLine().charAt(0);
+
+        if (option.equals('y') || option.equals('Y')) {
+            UserFunction.deletePlaylist(con, playlistIndex);
+            System.out.println("Deleted");
+            return 0;
+        } else {
+            System.out.println("Delete Canceled\n");
+        }
+        return 5;
+    }
+
+    private static void changePlaylistName(Connection con, int playlistIndex, int userIndex) {
+        System.out.print("Enter new Playlist name: ");
+        String newName = sc.nextLine();
+
+        if (UserFunction.checkPlaylistDuplicate(con, userIndex, newName)) {
+            System.out.print("Are you sure to change this playlist name to " + newName + "? (Y to confirm): ");
+            Character option = sc.nextLine().charAt(0);
+
+            if (option.equals('y') || option.equals('Y')) {
+                UserFunction.changePlaylistName(con, playlistIndex, newName);
+                System.out.println("Successfully Changed\n");
+            } else {
+                System.out.println("Change Canceled.");
+            }
+        }
+    }
+
+    private static void deletePlaylistMusic(Connection con, int playlistIndex) throws SQLException {
         System.out.print("Enter Music Index number: ");
         Integer midx = parse(sc.nextLine());
 
-        if(midx.equals(-1)){
+        if (midx.equals(-1)) {
             System.out.println("ERROR: Invalid Index");
-        }else{
-            ResultSet rs = GeneralQuery.generalCheck(con,"*",DatabaseHandler.PLAYLIST_MUSIC,"MUSICIDX = " + midx + " AND " +
+        } else {
+            ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST_MUSIC, "MUSICIDX = " + midx + " AND " +
                     "PIDX = " + playlistIndex);
 
-            if(rs.next()){
-                UserFunction.playMusic(con,String.valueOf(midx));
-            }else{
+            if (rs.next()) {
+                System.out.println("Are you sure to delete this music from your playlist? (Y to confim: )");
+                Character option = sc.nextLine().charAt(0);
+
+                if (option.equals('y') || option.equals('Y')) {
+                    UserFunction.deleteMusicFromPlaylist(con, midx, playlistIndex);
+                    System.out.println("Delete Complete \n");
+                } else {
+                    System.out.println("Delete Canceled.");
+                }
+            } else {
+                System.out.println("ERROR: Not available for current playlist");
+            }
+        }
+    }
+
+    private static void playPlaylistMusic(Connection con, int playlistIndex, int userIndex) throws SQLException {
+        System.out.print("Enter Music Index number: ");
+        Integer midx = parse(sc.nextLine());
+
+        if (midx.equals(-1)) {
+            System.out.println("ERROR: Invalid Index");
+        } else {
+            ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.PLAYLIST_MUSIC, "MUSICIDX = " + midx + " AND " +
+                    "PIDX = " + playlistIndex);
+
+            if (rs.next()) {
+                UserFunction.playMusic(con, String.valueOf(midx),userIndex);
+            } else {
                 System.out.println("ERROR: Not available for current playlist");
             }
         }
@@ -228,10 +385,10 @@ public class UserPage {
 
     private static void showAllMusics(Connection con, ResultSet rs) throws SQLException {
         List<MusicAttribute> list = MusicAttribute.getGeneralTypes();
-        while(rs.next()){
-            ResultSet queryResult = GeneralQuery.generalCheck(con,"*",DatabaseHandler.MUSIC,"IDX = "
+        while (rs.next()) {
+            ResultSet queryResult = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, "IDX = "
                     + rs.getInt("MUSICIDX"));
-            printMusicAttributes(queryResult,list);
+            printMusicAttributes(queryResult, list);
         }
     }
 
@@ -252,7 +409,7 @@ public class UserPage {
             System.out.println("Duplicate music exists in the same playlist!");
         }
     }
-    
+
 
     private static void userProfile(Connection con, ArrayList<String> userInfo) throws SQLException {
         ResultSet rs = DatabaseQuery.findProfile(con, userInfo.get(1));
@@ -296,14 +453,33 @@ public class UserPage {
         }
     }
 
-    private static ResultSet searchMusicByTitle(Connection con) throws SQLException {
-        System.out.print("Enter Title: ");
-        String title = sc.nextLine();
+    private static void searchMusicByTitle(Connection con, String title, Integer userIndex) throws SQLException {
 
         ArrayList<ResultSet> resultSets = UserFunction.searchMusic(
                 con, "Title", "'%" + title + "%'");
         ResultSet rs = resultSets.get(0);
         ResultSet queryResult = resultSets.get(1);
+        listResult(queryResult);
+        playMusic(con, rs, userIndex);
+    }
+
+    private static void searchMusicByGenre(Connection con, String genre,int userIndex) throws SQLException{
+        ArrayList<ResultSet> resultSets = UserFunction.searchMusic(con,"Genre","'%" + genre + "%'");
+        ResultSet rs = resultSets.get(0);
+        ResultSet queryResult = resultSets.get(1);
+        listResult(queryResult);
+        playMusic(con, rs, userIndex);
+    }
+
+    private static void searchMusicByArtist(Connection con, String artist, Integer userIndex) throws SQLException {
+        ArrayList<ResultSet> resultSets = UserFunction.searchMusic(con,"Artist","'%" + artist + "%'");
+        ResultSet rs = resultSets.get(0);
+        ResultSet queryResult = resultSets.get(1);
+        listResult(queryResult);
+        playMusic(con, rs, userIndex);
+    }
+
+    private static void listResult(ResultSet queryResult) throws SQLException {
         List<MusicAttribute> musicAttributes = MusicAttribute.getGeneralTypes();
 
         System.out.println("Index Number | Title | Artist | Produced by | Playtime | Genre | Released");
@@ -313,8 +489,8 @@ public class UserPage {
             System.out.print(queryResult.getInt("IDX") + " | ");
             printMusicAttributes(queryResult, musicAttributes);
         }
-        return rs;
     }
+
 
     private static void updateNickName(Connection con, String curSsn) {
         System.out.print("Your new Nickname: ");
@@ -405,7 +581,6 @@ public class UserPage {
 
     private static void printMusicAttributes(ResultSet queryResult, List<MusicAttribute> musicAttributes) throws
             SQLException {
-        System.out.println();
         while (queryResult.next()) {
             for (MusicAttribute musicAttribute : musicAttributes) {
                 System.out.print(queryResult.getString(musicAttribute.getAttribute()) + " | ");
@@ -414,7 +589,7 @@ public class UserPage {
         }
     }
 
-    private static void playMusic(Connection con, ResultSet rs) throws SQLException {
+    private static void playMusic(Connection con, ResultSet rs, Integer userIndex) throws SQLException {
         if (hasResult(rs)) {
             System.out.println(
                     "Enter 'index number' of music you want to play (Enter * to return): ");
@@ -424,8 +599,20 @@ public class UserPage {
                 System.out.print("Return to music search page...\n");
                 return;
             }
-            UserFunction.playMusic(con, target);
+            UserFunction.playMusic(con, target, userIndex);
         }
+    }
+
+    private static void playMusic(Connection con, Integer userIndex) throws SQLException{
+        System.out.println(
+                "Enter 'index number' of music you want to play (Enter * to return): ");
+        String target = sc.nextLine();
+
+        if (target.equals("*")||target.equals("0")) {
+            System.out.print("Return to music search page...\n");
+            return;
+        }
+        UserFunction.playMusic(con, target, userIndex);
     }
 
     private static boolean hasResult(ResultSet num) throws SQLException {
@@ -451,6 +638,4 @@ public class UserPage {
         }
         return false;
     }
-
-
 }

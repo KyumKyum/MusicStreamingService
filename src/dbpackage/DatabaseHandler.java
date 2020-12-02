@@ -21,6 +21,8 @@ public class DatabaseHandler {
     public final static String MUSIC = "music";
     public final static String PLAYLIST = "playlist";
     public final static String PLAYLIST_MUSIC = "playlist_music";
+    public final static String ACCOUNT_MUSIC = "account_music";
+    public final static String MUSIC_MOSTLY_LISTENED = "music_mostlylistened";
 
     public static Connection getConnect() throws SQLException {
 
