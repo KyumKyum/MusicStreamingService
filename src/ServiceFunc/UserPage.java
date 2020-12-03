@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
+import com.sun.javafx.image.impl.General;
 import dbpackage.DatabaseHandler;
 import dbpackage.DatabaseQuery;
 import dbpackage.GeneralQuery;
@@ -52,7 +53,10 @@ public class UserPage {
             }
 
             if (instr == 3) {
-                userProfile(con, userInfo);
+                boolean check = userProfile(con, userInfo);
+                if(!check){
+                    break;
+                }
             }
 
             if (instr == 0) {
@@ -411,7 +415,7 @@ public class UserPage {
     }
 
 
-    private static void userProfile(Connection con, ArrayList<String> userInfo) throws SQLException {
+    private static boolean userProfile(Connection con, ArrayList<String> userInfo) throws SQLException {
         ResultSet rs = DatabaseQuery.findProfile(con, userInfo.get(1));
         User user = getUser(rs);
 
@@ -423,7 +427,7 @@ public class UserPage {
                     "\nPROFILE OPTIONS:\nPress 1 to see my profile.\nPress 2 to change personal information(name,age)."
                             +
                             "\nPress 3 tp change email address." +
-                            "\nPress 4 to change Password.\nPress 5 to change Nickname.\nPress 0 to return.\nYour Choice: ");
+                            "\nPress 4 to change Password.\nPress 5 to change Nickname.\nPress 6 to Leave an account\nPress 0 to return.\nYour Choice: ");
 
             instr = parse(sc.nextLine());
 
@@ -450,7 +454,39 @@ public class UserPage {
             if (instr == 5) {
                 updateNickName(con, curSsn);
             }
+
+            if (instr == 6){
+                instr = leaveAccount(con, curSsn, user.getPassword());
+                if(instr == 0){
+                    return false;
+                }
+            }
         }
+        return true;
+    }
+
+
+    private static Integer leaveAccount(Connection con,String curSsn, String pw) {
+        if(checkPassword(pw)){
+            System.out.println("Are you sure? Your decision would not be recoverable! (Enter 'Confirm' COMPLETELY to leave your account - Capital sensitive. ): ");
+            String input = sc.nextLine();
+            if(input.equals("Confirm")){
+                GeneralQuery.generalDelete(con,DatabaseHandler.USER,"SSN = " + curSsn);
+                return 0;
+            }else{
+                System.out.println("Request Denied: The input string didn't match with the workd 'Confirm'.\n");
+            }
+        }else{
+            System.out.println("Access Denied: Password didn't match");
+        }
+        return 6;
+    }
+
+    private static boolean checkPassword(String pw) {
+        System.out.print("Enter your password: ");
+        String input = sc.nextLine();
+
+        return input.equals(pw);
     }
 
     private static void searchMusicByTitle(Connection con, String title, Integer userIndex) throws SQLException {

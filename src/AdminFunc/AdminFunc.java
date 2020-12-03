@@ -23,14 +23,26 @@ public class AdminFunc {
 
         System.out.println("\n- ADMINISTRATOR MENU -\nAUTHENTICATION REQUIRED");
 
-        System.out.print("Your ID: ");
+        System.out.print("Your ID (Enter * to return): ");
         AID = sc.nextLine();
+        if(AID.equals("*")){
+            System.out.println("Return to the main page...\n");
+            return;
+        }
 
-        System.out.print("Your Password: ");
+        System.out.print("Your Password (Enter * to return): ");
         APW = sc.nextLine();
+        if(APW.equals("*")){
+            System.out.println("Return to the main page...\n");
+            return;
+        }
 
-        System.out.print("Your Serial Code: ");
+        System.out.print("Your Serial Code (Enter * to return): ");
         serialNum = sc.nextLine();
+        if(serialNum.equals("*")){
+            System.out.println("Return to the main page...\n");
+            return;
+        }
 
         AID = "'" + AID + "'";
         APW = "'" + APW + "'";

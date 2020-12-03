@@ -126,7 +126,7 @@ public class UserFunction {
                         UserPage.openUserPage(con, userInfo);
                         instr = '0';
                     } else
-                        System.out.println("\nSign in Failed.\nHint: Maybe your ID or password is wrong.");
+                        System.out.println("\nSign in Failed.\nHint: Maybe your ID or password is wrong, or escape command is entered (*).");
                 }
                 case '2' -> {
                     UserAccount.findAccount(con);
@@ -141,10 +141,16 @@ public class UserFunction {
         String PW = null;
         ArrayList<String> userInfo = new ArrayList<>(4);
 
-        System.out.print("\nYour ID: ");
+        System.out.print("\nYour ID (Enter * to return): ");
         ID = sc.nextLine();
-        System.out.print("Your Password: ");
+        if(ID.equals("*")){
+            return null;
+        }
+        System.out.print("Your Password (Enter * to return): ");
         PW = sc.nextLine();
+        if(PW.equals("*")){
+            return null;
+        }
 
         ResultSet rs = DatabaseQuery.checkAccount(con, "UserIndex, Nickname", ID, PW);
 

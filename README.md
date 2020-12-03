@@ -53,7 +53,9 @@
   > xxxi. **The service can recommend mostly played musics** <br>
   > xxxii.**The service can analyze User's favorate genre**. <br>
   > xxxiii. **The service can recommend music based on the analysis.**. <br>
+  > xxxiv. Admin & User can cancel the signin operation freely by entering astrisks '*'. <br>
+  > xxxv. **User now can leave their account.** <br>
   
   <br>
 
-  - 21:15 02,Dec
+  - 18:19 03,Dec
