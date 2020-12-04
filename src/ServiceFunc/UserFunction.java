@@ -1,16 +1,19 @@
 package ServiceFunc;
 
 import MediaFunc.MusicPlayer;
-import com.sun.javafx.image.impl.General;
 import dbpackage.DatabaseHandler;
 import dbpackage.DatabaseQuery;
 import dbpackage.GeneralQuery;
-import org.mariadb.jdbc.internal.com.read.dao.Results;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Scanner;
+import java.util.Vector;
+
+import static Utils.StringUtils.stringTrim;
 
 public class UserFunction {
     public static Scanner sc = new Scanner(System.in);
@@ -49,7 +52,7 @@ public class UserFunction {
             String userInput = null;
             System.out.print("Your " + vec.elementAt(i) + ": ");
             do {
-                userInput = sc.nextLine();
+                userInput = stringTrim(sc.nextLine());
                 if (userInput.trim().isEmpty())
                     System.out.println("ERROR: Current Information is mandatory.");
                 else
@@ -86,7 +89,7 @@ public class UserFunction {
                 String userInput = null;
                 System.out.print("Your " + vec.elementAt(i) + ": ");
                 do {
-                    userInput = sc.nextLine();
+                    userInput = stringTrim(sc.nextLine());
                     if (userInput.trim().isEmpty())
                         System.out.println("ERROR: Current Information is mandatory.");
                     else
@@ -115,7 +118,7 @@ public class UserFunction {
 
         while (!instr.equals('0')) {
             System.out.print("Press 1 to sign in.\nPress 2 to find my account\nPress 0 to return (Go to main menu).\nYour Option: ");
-            instr = sc.nextLine().charAt(0);
+            instr = stringTrim(sc.nextLine()).charAt(0);
 
             switch (instr) {
                 case '0' -> System.out.println("\nReturn to the main menu...\n");
@@ -142,12 +145,12 @@ public class UserFunction {
         ArrayList<String> userInfo = new ArrayList<>(4);
 
         System.out.print("\nYour ID (Enter * to return): ");
-        ID = sc.nextLine();
+        ID = stringTrim(sc.nextLine());
         if(ID.equals("*")){
             return null;
         }
         System.out.print("Your Password (Enter * to return): ");
-        PW = sc.nextLine();
+        PW = stringTrim(sc.nextLine());
         if(PW.equals("*")){
             return null;
         }
@@ -202,7 +205,7 @@ public class UserFunction {
         //boolean success = false;
 
         System.out.print("\nEnter new playlist name: ");
-        String newName = sc.nextLine();
+        String newName = stringTrim(sc.nextLine());
         if (checkPlaylistDuplicate(con, idx, newName)) {
             GeneralQuery.generalInsert(con, DatabaseHandler.PLAYLIST, "Owner_idx, Playlist_name", idx + ", '" + newName + "'");
             System.out.println("Playlist Created!");
@@ -312,7 +315,7 @@ public class UserFunction {
 
                 while (!option.equals('0')) {
                     System.out.println("\nPress 1 to play & pause.\nPress 2 to stop.\nPress 3 to reload.\nPress 0 to return\nYour Option: ");
-                    option = sc.nextLine().charAt(0);
+                    option = stringTrim(sc.nextLine()).charAt(0);
 
                     switch (option) {
 

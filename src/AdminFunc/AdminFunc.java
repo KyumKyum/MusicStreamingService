@@ -2,13 +2,14 @@ package AdminFunc;
 
 import dbpackage.DatabaseQuery;
 
-import java.io.Serial;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Objects;
 import java.util.Scanner;
+
+import static Utils.StringUtils.stringTrim;
 
 public class AdminFunc {
 
@@ -24,21 +25,21 @@ public class AdminFunc {
         System.out.println("\n- ADMINISTRATOR MENU -\nAUTHENTICATION REQUIRED");
 
         System.out.print("Your ID (Enter * to return): ");
-        AID = sc.nextLine();
+        AID = stringTrim(sc.nextLine());
         if(AID.equals("*")){
             System.out.println("Return to the main page...\n");
             return;
         }
 
         System.out.print("Your Password (Enter * to return): ");
-        APW = sc.nextLine();
+        APW = stringTrim(sc.nextLine());
         if(APW.equals("*")){
             System.out.println("Return to the main page...\n");
             return;
         }
 
         System.out.print("Your Serial Code (Enter * to return): ");
-        serialNum = sc.nextLine();
+        serialNum = stringTrim(sc.nextLine());
         if(serialNum.equals("*")){
             System.out.println("Return to the main page...\n");
             return;

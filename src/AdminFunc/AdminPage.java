@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Scanner;
 
 import static Utils.StringUtils.parse;
+import static Utils.StringUtils.stringTrim;
 
 public class AdminPage {
 
@@ -114,7 +115,7 @@ public class AdminPage {
     private static void seeMusicTitle(Connection con) {
 
         System.out.print("Search For...(Title): ");
-        String title = sc.nextLine();
+        String title = stringTrim(sc.nextLine());
 
         try {
             ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.MUSIC, "Title LIKE '%" + title + "%'");
@@ -144,7 +145,7 @@ public class AdminPage {
 
         for (MusicAttribute musicAttribute : musicAttributes) {
             System.out.print(musicAttribute.getAttribute() + ": ");
-            String data = sc.nextLine();
+            String data = stringTrim(sc.nextLine());
 
             if (data.equals("*")) {
                 canceled = true;
@@ -173,7 +174,7 @@ public class AdminPage {
         //System.out.println(musicInfo);
 
         System.out.println("\nAre the information valid? It is okay to add? (Y to confirm): ");
-        Character option = sc.nextLine().charAt(0);
+        Character option = stringTrim(sc.nextLine()).charAt(0);
 
         if (option.equals('y') || option.equals('Y')) {
             boolean res = GeneralQuery.generalInsert(con, DatabaseHandler.MUSIC, "Title, Artist, Prod, Playtime, Genre, Released, URL", musicInfo);
@@ -220,7 +221,7 @@ public class AdminPage {
 
     private static void confirmDeleteMusic(Connection con, int idx) {
         System.out.print("Are you sure? Current decision cannot be undone! (Y: Yes/N: No): ");
-        Character decision = sc.nextLine().charAt(0);
+        Character decision = stringTrim(sc.nextLine()).charAt(0);
         if (decision.equals('y') || decision.equals('Y')) {
             GeneralQuery.generalDelete(con, DatabaseHandler.MUSIC, "IDX = " + idx);
             System.out.println("Deleted");
@@ -271,7 +272,7 @@ public class AdminPage {
         boolean cancel = false;
 
         System.out.println("Write Correct attribute name to change (Enter * to cancel.)");
-        option = sc.nextLine();
+        option = stringTrim(sc.nextLine());
 
         if (option.equals("*")) {
             cancel = true;
@@ -287,7 +288,7 @@ public class AdminPage {
                 cancel = true;
             } else {
                 System.out.print("Write new value for corresponding Attribute: ");
-                changeTo = sc.nextLine();
+                changeTo = stringTrim(sc.nextLine());
             }
         }
 
@@ -300,7 +301,7 @@ public class AdminPage {
 
     private static void confirmMusicChange(Connection con, String changeTo, String option, Integer target) {
         System.out.println("Confirm the changes? (Y to confirm): ");
-        Character confirm = sc.nextLine().charAt(0);
+        Character confirm = stringTrim(sc.nextLine()).charAt(0);
 
         if(confirm.equals('y') || confirm.equals('Y')){
             boolean result = GeneralQuery.generalUpdate(con, DatabaseHandler.MUSIC,
@@ -351,7 +352,7 @@ public class AdminPage {
 
     private static void deleteUser(Connection con) {
         System.out.print("Target User ID: ");
-        String id = sc.nextLine();
+        String id = stringTrim(sc.nextLine());
 
         ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.ACCOUNT, "ID = " + "'" + id + "'");
 
@@ -368,7 +369,7 @@ public class AdminPage {
 
     private static void confirmDeleteUser(Connection con, String id) {
         System.out.print("Are you sure? Current decision cannot be undone! (Y: Yes/N: No): ");
-        Character decision = sc.nextLine().charAt(0);
+        Character decision = stringTrim(sc.nextLine()).charAt(0);
         if (decision.equals('y') || decision.equals('Y')) {
             GeneralQuery.generalDelete(con, DatabaseHandler.ACCOUNT, "ID = " + "'" + id + "'");
             System.out.println("Deleted");
@@ -379,14 +380,14 @@ public class AdminPage {
 
     private static void modifyUserInfo(Connection con) {
         System.out.print("Target User ID: ");
-        String id = sc.nextLine();
+        String id = stringTrim(sc.nextLine());
 
         ResultSet rs = GeneralQuery.generalCheck(con, "*", DatabaseHandler.ACCOUNT, "ID = " + "'" + id + "'");
 
         try {
             if (rs.next()) {
                 System.out.print("New User ID: ");
-                String newId = sc.nextLine();
+                String newId = stringTrim(sc.nextLine());
                 ResultSet checkDup = GeneralQuery.generalCheck(con, "*", DatabaseHandler.ACCOUNT, "ID = " + "'" + newId + "'");
                 confirmModification(con, checkDup, id, newId);
             } else {
@@ -401,7 +402,7 @@ public class AdminPage {
         try {
             if (!checkDup.next()) {
                 System.out.print("Are you sure to change ID '" + id + "' to '" + newId + "'? (Y to confirm.): ");
-                Character confirm = sc.nextLine().charAt(0);
+                Character confirm = stringTrim(sc.nextLine()).charAt(0);
                 if (confirm.equals('y') || confirm.equals('Y')) {
                     GeneralQuery.generalUpdate(con, DatabaseHandler.ACCOUNT, "ID = " + "'" + newId + "'", "ID = " + "'" + id + "'");
                     System.out.println("REQUEST SUCCESS: UPDATED\n");
@@ -418,7 +419,7 @@ public class AdminPage {
 
     private static void getUserInfo(Connection con) {
         System.out.print("Search for...(ID): ");
-        String target = sc.nextLine();
+        String target = stringTrim(sc.nextLine());
 
         ResultSet rs = GeneralQuery.generalCheck(con, "ID,name,Nickname,age,Email", DatabaseHandler.PROFILE, "ID = " + "'" + target + "'");
         try {

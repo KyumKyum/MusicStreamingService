@@ -1,5 +1,9 @@
 package ServiceFunc;
 
+import dbpackage.DatabaseHandler;
+import dbpackage.DatabaseQuery;
+import dbpackage.GeneralQuery;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,12 +12,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-import com.sun.javafx.image.impl.General;
-import dbpackage.DatabaseHandler;
-import dbpackage.DatabaseQuery;
-import dbpackage.GeneralQuery;
-
 import static Utils.StringUtils.parse;
+import static Utils.StringUtils.stringTrim;
 
 public class UserPage {
 
@@ -90,17 +90,19 @@ public class UserPage {
             }
             else if (option.equals(3)) {
                 System.out.print("Enter Title: ");
-                String title = sc.nextLine();
+                String title = stringTrim(sc.nextLine());
+                title = title.trim().replace("'","").replace("\"","");
                 searchMusicByTitle(con,title,userIndex);
             }
             else if (option.equals(4)){
                 System.out.println("Enter Artist Name: ");
-                String artist = sc.nextLine();
+                String artist = stringTrim(sc.nextLine());
+                artist = artist.trim().replace("'","").replace("\"","");
                 searchMusicByArtist(con,artist,userIndex);
             }
             else if(option.equals(5)){
                 System.out.println("Enter Genre: ");
-                String genre = sc.nextLine();
+                String genre = stringTrim(sc.nextLine());
                 searchMusicByGenre(con,genre,userIndex);
             }else if(option.equals(6)){
                 playMusic(con,userIndex);
@@ -192,7 +194,7 @@ public class UserPage {
             playListMenu(con, userIndex);
         } else {
             System.out.println("No Playlist Found. Create new playlist? (Y: Yes/N: No): ");
-            Character createNew = sc.nextLine().charAt(0);
+            Character createNew = stringTrim(sc.nextLine()).charAt(0);
 
             if (createNew.equals('y') || createNew.equals('Y')) {
                 UserFunction.createPlaylist(con, userIndex);
@@ -237,7 +239,7 @@ public class UserPage {
 
                 case 2 -> {
                     System.out.print("Enter Playlist Title: ");
-                    String title = sc.nextLine();
+                    String title = stringTrim(sc.nextLine());
 
 
                     Integer playlistIdx = UserFunction.getPlaylist(con, title, userIndex);
@@ -314,7 +316,7 @@ public class UserPage {
 
     private static Integer deletePlaylist(Connection con, int playlistIndex) {
         System.out.print("Are you sure to delete? (All music will be deleted and current operation is not recoverable! (Y to confirm): ");
-        Character option = sc.nextLine().charAt(0);
+        Character option = stringTrim(sc.nextLine()).charAt(0);
 
         if (option.equals('y') || option.equals('Y')) {
             UserFunction.deletePlaylist(con, playlistIndex);
@@ -328,11 +330,11 @@ public class UserPage {
 
     private static void changePlaylistName(Connection con, int playlistIndex, int userIndex) {
         System.out.print("Enter new Playlist name: ");
-        String newName = sc.nextLine();
+        String newName = stringTrim(sc.nextLine());
 
         if (UserFunction.checkPlaylistDuplicate(con, userIndex, newName)) {
             System.out.print("Are you sure to change this playlist name to " + newName + "? (Y to confirm): ");
-            Character option = sc.nextLine().charAt(0);
+            Character option = stringTrim(sc.nextLine()).charAt(0);
 
             if (option.equals('y') || option.equals('Y')) {
                 UserFunction.changePlaylistName(con, playlistIndex, newName);
@@ -355,7 +357,7 @@ public class UserPage {
 
             if (rs.next()) {
                 System.out.println("Are you sure to delete this music from your playlist? (Y to confim: )");
-                Character option = sc.nextLine().charAt(0);
+                Character option = stringTrim(sc.nextLine()).charAt(0);
 
                 if (option.equals('y') || option.equals('Y')) {
                     UserFunction.deleteMusicFromPlaylist(con, midx, playlistIndex);
@@ -469,7 +471,7 @@ public class UserPage {
     private static Integer leaveAccount(Connection con,String curSsn, String pw) {
         if(checkPassword(pw)){
             System.out.println("Are you sure? Your decision would not be recoverable! (Enter 'Confirm' COMPLETELY to leave your account - Capital sensitive. ): ");
-            String input = sc.nextLine();
+            String input = stringTrim(sc.nextLine());
             if(input.equals("Confirm")){
                 GeneralQuery.generalDelete(con,DatabaseHandler.USER,"SSN = " + curSsn);
                 return 0;
@@ -484,13 +486,12 @@ public class UserPage {
 
     private static boolean checkPassword(String pw) {
         System.out.print("Enter your password: ");
-        String input = sc.nextLine();
+        String input = stringTrim(sc.nextLine());
 
         return input.equals(pw);
     }
 
     private static void searchMusicByTitle(Connection con, String title, Integer userIndex) throws SQLException {
-
         ArrayList<ResultSet> resultSets = UserFunction.searchMusic(
                 con, "Title", "'%" + title + "%'");
         ResultSet rs = resultSets.get(0);
@@ -530,11 +531,11 @@ public class UserPage {
 
     private static void updateNickName(Connection con, String curSsn) {
         System.out.print("Your new Nickname: ");
-        String newNickName = sc.nextLine();
+        String newNickName = stringTrim(sc.nextLine());
 
         System.out.print(
                 "Your new Nickname is " + newNickName + ". Am I right? (Enter y to say Yes): ");
-        Character answer = sc.nextLine().charAt(0);
+        Character answer = stringTrim(sc.nextLine()).charAt(0);
 
         if (answer.equals('y') || answer.equals('Y')) {
             DatabaseQuery.updateProfile(con, DatabaseHandler.ACCOUNT, "Nickname",
@@ -548,7 +549,7 @@ public class UserPage {
 
     private static void updatePassword(Connection con, String curSsn, User user) {
         System.out.print("Your current password: ");
-        String oldPassword = sc.nextLine();
+        String oldPassword = stringTrim(sc.nextLine());
 
         if (!oldPassword.equals(user.getPassword())) {
             System.out.println("Request Denied: Didn't match with original password\n");
@@ -556,9 +557,9 @@ public class UserPage {
         }
 
         System.out.print("Your new password: ");
-        String newPassword = sc.nextLine();
+        String newPassword = stringTrim(sc.nextLine());
         System.out.print("Your new password (confirm): ");
-        String matchNewPassword = sc.nextLine();
+        String matchNewPassword = stringTrim(sc.nextLine());
 
         if (newPassword.equals(matchNewPassword)) {
             DatabaseQuery.updateProfile(con, DatabaseHandler.ACCOUNT, "PW", "'" + newPassword + "'",
@@ -572,7 +573,7 @@ public class UserPage {
 
     private static void updateEmail(Connection con, String curSsn) throws SQLException {
         System.out.print("Your new Email: ");
-        String newEmail = sc.nextLine();
+        String newEmail = stringTrim(sc.nextLine());
 
         ResultSet checkedResult = GeneralQuery.generalCheck(con, "email", DatabaseHandler.USER,
                 "email = '" + newEmail + "'");
@@ -589,7 +590,7 @@ public class UserPage {
 
     private static void updateNameAndAge(Connection con, String curSsn) {
         System.out.print("Your new name: ");
-        String newName = sc.nextLine();
+        String newName = stringTrim(sc.nextLine());
         System.out.print("Your new age: ");
         int newAge = Integer.parseInt(sc.nextLine());
 
@@ -629,7 +630,7 @@ public class UserPage {
         if (hasResult(rs)) {
             System.out.println(
                     "Enter 'index number' of music you want to play (Enter * to return): ");
-            String target = sc.nextLine();
+            String target = stringTrim(sc.nextLine());
 
             if (target.equals("*")) {
                 System.out.print("Return to music search page...\n");
@@ -642,7 +643,7 @@ public class UserPage {
     private static void playMusic(Connection con, Integer userIndex) throws SQLException{
         System.out.println(
                 "Enter 'index number' of music you want to play (Enter * to return): ");
-        String target = sc.nextLine();
+        String target = stringTrim(sc.nextLine());
 
         if (target.equals("*")||target.equals("0")) {
             System.out.print("Return to music search page...\n");
@@ -665,7 +666,7 @@ public class UserPage {
 
     private static boolean signOut() {
         System.out.print("Are you Sure? (Enter Yes or y to confirm.)");
-        Character YorN = sc.nextLine().charAt(0);
+        Character YorN = stringTrim(sc.nextLine()).charAt(0);
 
         if (YorN.equals('y') || YorN.equals('Y')) {
             return true;

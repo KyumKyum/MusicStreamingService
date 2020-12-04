@@ -9,4 +9,12 @@ public class StringUtils {
         }
         return -1;
     }
+
+    public static String stringTrim(String input){
+        return stringReplace(input).trim();
+    }
+
+    private static String stringReplace(String input){
+        return input.replace("'","").replace("\"","");
+    }
 }

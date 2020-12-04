@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Scanner;
 
+import static Utils.StringUtils.stringTrim;
+
 public class UserAccount {
     public static Scanner sc = new Scanner(System.in);
 
@@ -30,7 +32,7 @@ public class UserAccount {
 
                 case 1:
                     System.out.print("Find my ID- Enter your Social Security Number (SSN): ");
-                    SSN = sc.nextLine();
+                    SSN = stringTrim(sc.nextLine());
                     queryResult = DatabaseQuery.findAccount(con, "ID", SSN);
 
                     try {
@@ -52,9 +54,9 @@ public class UserAccount {
                 case 2:
                     String queryPassword = null;
                     System.out.println("Find my password- Enter your Social Security Number (SSN): ");
-                    SSN = sc.nextLine();
+                    SSN = stringTrim(sc.nextLine());
                     System.out.println("Enter your ID: ");
-                    ID = sc.nextLine();
+                    ID = stringTrim(sc.nextLine());
 
                     queryResult = DatabaseQuery.findAccount(con,"*",SSN);
 

@@ -1,7 +1,6 @@
 package com.company;
 
 import AdminFunc.AdminFunc;
-import ServiceFunc.UserAccount;
 import dbpackage.DatabaseHandler;
 import ServiceFunc.UserFunction;
 
