@@ -2,7 +2,7 @@
   <artifact type="jar" name="DBProject:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/DBProject_jar</output-path>
     <root id="archive" name="DBProject.jar">
-      <element id="module-output" name="DBProject" />
+      <element id="module-output" name="MusicStreamingService" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../../../../Dev/MariaDB/mariadb-java-client-2.7.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../../../../Dev/openjfx-11.0.2_windows-x64_bin-sdk/javafx-sdk-11.0.2/lib/src.zip" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../../../../Dev/openjfx-11.0.2_windows-x64_bin-sdk/javafx-sdk-11.0.2/lib/javafx-swt.jar" path-in-jar="/" />
