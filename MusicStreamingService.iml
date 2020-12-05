@@ -51,8 +51,8 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" exported="" name="mariadb-java-client-2.7.1" level="project" />
     <orderEntry type="library" exported="" name="openjfx-11.0" level="project" />
-    <orderEntry type="library" name="javafx-swt" level="project" />
+    <orderEntry type="library" exported="" name="mariadb-java-client-2.7.1" level="application" />
+    <orderEntry type="library" exported="" name="javafx12" level="application" />
   </component>
 </module>
