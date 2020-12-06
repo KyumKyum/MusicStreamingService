@@ -2,6 +2,12 @@
 
 <hr/>
 
+**Java Code Files: Loacted in MusicStreamingService/src**
+
+<br>
+
+<hr/>
+
   - *Sample music list*<br>
    &nbsp;&nbsp;&nbsp;&nbsp;Anonymous Artists - 퇴사 (Art. 이민석) <br>
    &nbsp;&nbsp;&nbsp;&nbsp;Caravan Palace - Lone Digger (Phietto Remix) <br>
@@ -18,6 +24,8 @@
    &nbsp;&nbsp;&nbsp;&nbsp;Kdrew - Citadel <br>
 
 <br>
+
+<hr/>
 
 - **Current Progress**
   > i. Connect IntelliJ to MariaDB using MariaDB ConnectorJ<br>
@@ -55,7 +63,10 @@
   > xxxiii. **The service can recommend music based on the analysis.**. <br>
   > xxxiv. Admin & User can cancel the signin operation freely by entering astrisks '*'. <br>
   > xxxv. **User now can leave their account.** <br>
+  > xxxvi. Solving Minor Issues <br>
+  > xxxvii. **Create JAR File** <br>
+  **DONE**
   
   <br>
 
-  - 18:19 03,Dec
+  - 22:42 06,Dec

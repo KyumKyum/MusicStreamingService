@@ -295,7 +295,7 @@ public class AdminPage {
         if (cancel) {
             System.out.println("RESULT: DENIED - Process Canceled");
         } else {
-            confirmMusicChange(con,changeTo,option,target);
+            confirmMusicChange(con, changeTo, option, target);
         }
     }
 
@@ -303,14 +303,14 @@ public class AdminPage {
         System.out.println("Confirm the changes? (Y to confirm): ");
         Character confirm = stringTrim(sc.nextLine()).charAt(0);
 
-        if(confirm.equals('y') || confirm.equals('Y')){
+        if (confirm.equals('y') || confirm.equals('Y')) {
             boolean result = GeneralQuery.generalUpdate(con, DatabaseHandler.MUSIC,
                     option + " = '" + changeTo + "'", "IDX = " + target);
 
             if (result) {
                 System.out.println("Successful!");
             }
-        }else{
+        } else {
             System.out.println("Process Canceled");
         }
     }
@@ -386,10 +386,12 @@ public class AdminPage {
 
         try {
             if (rs.next()) {
-                System.out.print("New User ID: ");
-                String newId = stringTrim(sc.nextLine());
-                ResultSet checkDup = GeneralQuery.generalCheck(con, "*", DatabaseHandler.ACCOUNT, "ID = " + "'" + newId + "'");
-                confirmModification(con, checkDup, id, newId);
+                String curNickname = rs.getString("Nickname");
+                System.out.println("Current User Nickname: " + curNickname);
+                System.out.print("New User Nickname: ");
+                String newNick = stringTrim(sc.nextLine());
+                //ResultSet checkDup = GeneralQuery.generalCheck(con, "*", DatabaseHandler.ACCOUNT, "ID = " + "'" + newId + "'");
+                confirmModification(con, curNickname, id, newNick);
             } else {
                 System.out.println("REQUEST ABORTED: NO SUCH ID EXISTS.\n");
             }
@@ -398,22 +400,14 @@ public class AdminPage {
         }
     }
 
-    private static void confirmModification(Connection con, ResultSet checkDup, String id, String newId) {
-        try {
-            if (!checkDup.next()) {
-                System.out.print("Are you sure to change ID '" + id + "' to '" + newId + "'? (Y to confirm.): ");
-                Character confirm = stringTrim(sc.nextLine()).charAt(0);
-                if (confirm.equals('y') || confirm.equals('Y')) {
-                    GeneralQuery.generalUpdate(con, DatabaseHandler.ACCOUNT, "ID = " + "'" + newId + "'", "ID = " + "'" + id + "'");
-                    System.out.println("REQUEST SUCCESS: UPDATED\n");
-                } else {
-                    System.out.println("Canceled.");
-                }
-            } else {
-                System.out.println("REQUEST ABORTED: SAME ID EXISTS\n");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    private static void confirmModification(Connection con, String oldNickname, String id, String newNick) {
+        System.out.print("Are you sure to change Nickname '" + oldNickname + "' to '" + newNick + "'? (Y to confirm.): ");
+        Character confirm = stringTrim(sc.nextLine()).charAt(0);
+        if (confirm.equals('y') || confirm.equals('Y')) {
+            GeneralQuery.generalUpdate(con, DatabaseHandler.ACCOUNT, "Nickname = " + "'" + newNick + "'", "ID = " + "'" + id + "'");
+            System.out.println("REQUEST SUCCESS: UPDATED\n");
+        } else {
+            System.out.println("Canceled.");
         }
     }
 

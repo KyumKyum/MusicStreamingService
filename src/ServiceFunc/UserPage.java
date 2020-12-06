@@ -24,7 +24,7 @@ public class UserPage {
         try {
             System.out.println("\nWELCOME! " + userInfo.get(0));
             inputUserPageMenu(con, userInfo);
-            System.out.println("See you later, " + userInfo.get(0) + "!");
+            System.out.println("Bye!!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -34,7 +34,13 @@ public class UserPage {
         int instr = 1;
 
         while (true) {
-            System.out.println("\n-" + userInfo.get(0) + "'(s) Page-");
+            ResultSet rs = GeneralQuery.generalCheck(con,"Nickname",DatabaseHandler.ACCOUNT,"UserIndex = "+userInfo.get(3));
+            String nickname = "DEFAULT";
+            rs.beforeFirst();
+            while(rs.next()){
+                nickname = rs.getString("Nickname");
+            }
+            System.out.println("\n-" + nickname + "'(s) Page-");
             System.out.print("Press 1 to search music.\nPress 2 to see my playlist\n" +
                     "Press 3 to configure your profile.\npress 0 to sign out\nYour Option: ");
             instr = parse(sc.nextLine());
